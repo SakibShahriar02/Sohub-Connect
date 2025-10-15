@@ -1,27 +1,94 @@
-import { useState } from "react";
-import { Link } from "react-router";
+import { useState, useEffect } from "react";
+import { Link, useParams } from "react-router";
 import PageMeta from "../../components/common/PageMeta";
 
-export default function AddUser() {
+interface QuickCall {
+  id: number;
+  date_time: string;
+  assigned_to: string;
+  call_to: string;
+  caller_id: string;
+  trunk_name: string;
+  play_strategy: string;
+  play_type: string;
+  play: string;
+  tech: string;
+  tts_language: string;
+  last_play_date_time: string;
+  status: string;
+}
+
+const dummyQuickCalls: QuickCall[] = [
+  {
+    id: 1,
+    date_time: "2024-01-15 10:30:00",
+    assigned_to: "John Doe",
+    call_to: "+1234567890",
+    caller_id: "+1987654321",
+    trunk_name: "Main Trunk",
+    play_strategy: "Sequential",
+    play_type: "TTS",
+    play: "Welcome to our service",
+    tech: "SIP",
+    tts_language: "English (US)",
+    last_play_date_time: "2024-01-15 14:20:00",
+    status: "Active"
+  },
+  {
+    id: 2,
+    date_time: "2024-01-14 14:20:00",
+    assigned_to: "Jane Smith",
+    call_to: "+1234567891",
+    caller_id: "+1987654322",
+    trunk_name: "Support Trunk",
+    play_strategy: "Random",
+    play_type: "Audio",
+    play: "support_message.wav",
+    tech: "IAX2",
+    tts_language: "English (US)",
+    last_play_date_time: "2024-01-14 16:45:00",
+    status: "Active"
+  }
+];
+
+export default function EditQuickCall() {
+  const { id } = useParams<{ id: string }>();
   const [formData, setFormData] = useState({
-    staff_id: '',
-    name: '',
-    email: '',
-    mobileno: '',
-    gender: '',
-    address: '',
-    department: '',
-    designation: '',
-    joining_date: '',
-    birthday: '',
-    blood_group: '',
-    marital_status: '',
+    assigned_to: '',
+    call_to: '',
+    caller_id: '',
+    trunk_name: '',
+    play_strategy: 'Sequential',
+    play_type: 'TTS',
+    play: '',
+    tech: 'SIP',
+    tts_language: 'English (US)',
     status: 'Active'
   });
 
+  useEffect(() => {
+    if (id) {
+      const quickCall = dummyQuickCalls.find(q => q.id === parseInt(id));
+      if (quickCall) {
+        setFormData({
+          assigned_to: quickCall.assigned_to,
+          call_to: quickCall.call_to,
+          caller_id: quickCall.caller_id,
+          trunk_name: quickCall.trunk_name,
+          play_strategy: quickCall.play_strategy,
+          play_type: quickCall.play_type,
+          play: quickCall.play,
+          tech: quickCall.tech,
+          tts_language: quickCall.tts_language,
+          status: quickCall.status
+        });
+      }
+    }
+  }, [id]);
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    console.log('Form submitted:', formData);
+    console.log('Form updated:', formData);
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
@@ -33,13 +100,13 @@ export default function AddUser() {
 
   return (
     <>
-      <PageMeta title="Add Staff | User Management" description="Add new staff member" />
+      <PageMeta title="Edit Quick Call | Voice" description="Edit quick call configuration" />
       
       <div className="space-y-6">
         <div className="flex justify-between items-center">
-          <h1 className="text-2xl font-bold text-gray-800 dark:text-white/90">Add Staff</h1>
+          <h1 className="text-2xl font-bold text-gray-800 dark:text-white/90">Edit Quick Call</h1>
           <Link
-            to="/user-management/user-list"
+            to="/voice/quick-call"
             className="text-gray-600 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-200"
           >
             ← Back to List
@@ -51,12 +118,12 @@ export default function AddUser() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  Staff ID *
+                  Assigned To *
                 </label>
                 <input
                   type="text"
-                  name="staff_id"
-                  value={formData.staff_id}
+                  name="assigned_to"
+                  value={formData.assigned_to}
                   onChange={handleChange}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-800 dark:border-gray-600 dark:text-white"
                   required
@@ -65,40 +132,12 @@ export default function AddUser() {
               
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  Full Name *
-                </label>
-                <input
-                  type="text"
-                  name="name"
-                  value={formData.name}
-                  onChange={handleChange}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-800 dark:border-gray-600 dark:text-white"
-                  required
-                />
-              </div>
-              
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  Email *
-                </label>
-                <input
-                  type="email"
-                  name="email"
-                  value={formData.email}
-                  onChange={handleChange}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-800 dark:border-gray-600 dark:text-white"
-                  required
-                />
-              </div>
-              
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  Mobile Number *
+                  Call To *
                 </label>
                 <input
                   type="tel"
-                  name="mobileno"
-                  value={formData.mobileno}
+                  name="call_to"
+                  value={formData.call_to}
                   onChange={handleChange}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-800 dark:border-gray-600 dark:text-white"
                   required
@@ -107,48 +146,25 @@ export default function AddUser() {
               
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  Gender
+                  Caller ID
                 </label>
-                <select
-                  name="gender"
-                  value={formData.gender}
+                <input
+                  type="tel"
+                  name="caller_id"
+                  value={formData.caller_id}
                   onChange={handleChange}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-800 dark:border-gray-600 dark:text-white"
-                >
-                  <option value="">Select Gender</option>
-                  <option value="Male">Male</option>
-                  <option value="Female">Female</option>
-                  <option value="Other">Other</option>
-                </select>
+                />
               </div>
               
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  Department
-                </label>
-                <select
-                  name="department"
-                  value={formData.department}
-                  onChange={handleChange}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-800 dark:border-gray-600 dark:text-white"
-                >
-                  <option value="">Select Department</option>
-                  <option value="IT">IT</option>
-                  <option value="Sales">Sales</option>
-                  <option value="Marketing">Marketing</option>
-                  <option value="Finance">Finance</option>
-                  <option value="HR">HR</option>
-                </select>
-              </div>
-              
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  Designation
+                  Trunk Name
                 </label>
                 <input
                   type="text"
-                  name="designation"
-                  value={formData.designation}
+                  name="trunk_name"
+                  value={formData.trunk_name}
                   onChange={handleChange}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-800 dark:border-gray-600 dark:text-white"
                 />
@@ -156,67 +172,65 @@ export default function AddUser() {
               
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  Joining Date
-                </label>
-                <input
-                  type="date"
-                  name="joining_date"
-                  value={formData.joining_date}
-                  onChange={handleChange}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-800 dark:border-gray-600 dark:text-white"
-                />
-              </div>
-              
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  Birthday
-                </label>
-                <input
-                  type="date"
-                  name="birthday"
-                  value={formData.birthday}
-                  onChange={handleChange}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-800 dark:border-gray-600 dark:text-white"
-                />
-              </div>
-              
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  Blood Group
+                  Play Strategy
                 </label>
                 <select
-                  name="blood_group"
-                  value={formData.blood_group}
+                  name="play_strategy"
+                  value={formData.play_strategy}
                   onChange={handleChange}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-800 dark:border-gray-600 dark:text-white"
                 >
-                  <option value="">Select Blood Group</option>
-                  <option value="A+">A+</option>
-                  <option value="A-">A-</option>
-                  <option value="B+">B+</option>
-                  <option value="B-">B-</option>
-                  <option value="AB+">AB+</option>
-                  <option value="AB-">AB-</option>
-                  <option value="O+">O+</option>
-                  <option value="O-">O-</option>
+                  <option value="Sequential">Sequential</option>
+                  <option value="Random">Random</option>
+                  <option value="Loop">Loop</option>
+                  <option value="Immediate">Immediate</option>
                 </select>
               </div>
               
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  Marital Status
+                  Play Type
                 </label>
                 <select
-                  name="marital_status"
-                  value={formData.marital_status}
+                  name="play_type"
+                  value={formData.play_type}
                   onChange={handleChange}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-800 dark:border-gray-600 dark:text-white"
                 >
-                  <option value="">Select Status</option>
-                  <option value="Single">Single</option>
-                  <option value="Married">Married</option>
-                  <option value="Divorced">Divorced</option>
-                  <option value="Widowed">Widowed</option>
+                  <option value="TTS">TTS</option>
+                  <option value="Audio">Audio</option>
+                </select>
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  Tech
+                </label>
+                <select
+                  name="tech"
+                  value={formData.tech}
+                  onChange={handleChange}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-800 dark:border-gray-600 dark:text-white"
+                >
+                  <option value="SIP">SIP</option>
+                  <option value="IAX2">IAX2</option>
+                </select>
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  TTS Language
+                </label>
+                <select
+                  name="tts_language"
+                  value={formData.tts_language}
+                  onChange={handleChange}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-800 dark:border-gray-600 dark:text-white"
+                >
+                  <option value="English (US)">English (US)</option>
+                  <option value="English (UK)">English (UK)</option>
+                  <option value="Spanish (ES)">Spanish (ES)</option>
+                  <option value="French (FR)">French (FR)</option>
                 </select>
               </div>
               
@@ -238,20 +252,22 @@ export default function AddUser() {
             
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                Address
+                Play Content *
               </label>
               <textarea
-                name="address"
-                value={formData.address}
+                name="play"
+                value={formData.play}
                 onChange={handleChange}
                 rows={3}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-800 dark:border-gray-600 dark:text-white"
+                placeholder="Enter text for TTS or audio file name..."
+                required
               />
             </div>
             
             <div className="flex justify-end space-x-4">
               <Link
-                to="/user-management/user-list"
+                to="/voice/quick-call"
                 className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-800"
               >
                 Cancel
@@ -260,7 +276,7 @@ export default function AddUser() {
                 type="submit"
                 className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
               >
-                Add Staff
+                Update Quick Call
               </button>
             </div>
           </form>

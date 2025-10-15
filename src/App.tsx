@@ -31,15 +31,24 @@ import RingGroup from "./pages/Voice/PBX/RingGroup";
 import ClosedUserGroup from "./pages/Voice/PBX/ClosedUserGroup";
 import ApprovedTrunks from "./pages/Voice/PBX/ApprovedTrunks";
 import CallerIDs from "./pages/Voice/CallerIDs";
+import AddCallerID from "./pages/Voice/AddCallerID";
+import EditCallerID from "./pages/Voice/EditCallerID";
 import SoundFiles from "./pages/Voice/SoundFiles";
+import AddSoundFile from "./pages/Voice/AddSoundFile";
+import EditSoundFile from "./pages/Voice/EditSoundFile";
 import TextToSpeech from "./pages/Voice/TextToSpeech";
+import AddTTS from "./pages/Voice/AddTTS";
+import EditTTS from "./pages/Voice/EditTTS";
 import QuickCall from "./pages/Voice/QuickCall";
+import AddQuickCall from "./pages/Voice/AddQuickCall";
+import EditQuickCall from "./pages/Voice/EditQuickCall";
 import CallFlow from "./pages/Voice/CallFlow";
 import CallReports from "./pages/Reports/CallReports";
 import TransactionHistory from "./pages/Reports/TransactionHistory";
 import DeletedExtensionLogs from "./pages/Reports/DeletedExtensionLogs";
 import UserList from "./pages/UserManagement/UserList";
 import AddUser from "./pages/UserManagement/AddUser";
+import EditUser from "./pages/UserManagement/EditUser";
 import LoginDeactivate from "./pages/UserManagement/LoginDeactivate";
 import GlobalSetting from "./pages/Settings/GlobalSetting";
 import RolePermission from "./pages/Settings/RolePermission";
@@ -77,9 +86,17 @@ export default function App() {
 
             {/* Voice - Other */}
             <Route path="/voice/caller-ids" element={<CallerIDs />} />
+            <Route path="/voice/caller-ids/add" element={<AddCallerID />} />
+            <Route path="/voice/caller-ids/edit/:id" element={<EditCallerID />} />
             <Route path="/voice/sound-files" element={<SoundFiles />} />
+            <Route path="/voice/sound-files/add" element={<AddSoundFile />} />
+            <Route path="/voice/sound-files/edit/:id" element={<EditSoundFile />} />
             <Route path="/voice/text-to-speech" element={<TextToSpeech />} />
+            <Route path="/voice/text-to-speech/add" element={<AddTTS />} />
+            <Route path="/voice/text-to-speech/edit/:id" element={<EditTTS />} />
             <Route path="/voice/quick-call" element={<QuickCall />} />
+            <Route path="/voice/quick-call/add" element={<AddQuickCall />} />
+            <Route path="/voice/quick-call/edit/:id" element={<EditQuickCall />} />
             <Route path="/voice/call-flow" element={<CallFlow />} />
 
             {/* Reports */}
@@ -90,6 +107,7 @@ export default function App() {
             {/* User Management */}
             <Route path="/user-management/user-list" element={<UserList />} />
             <Route path="/user-management/add-user" element={<AddUser />} />
+            <Route path="/user-management/edit-user/:id" element={<EditUser />} />
             <Route path="/user-management/login-deactivate" element={<LoginDeactivate />} />
 
             {/* Settings */}

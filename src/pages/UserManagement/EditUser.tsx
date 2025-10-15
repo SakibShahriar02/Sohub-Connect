@@ -1,43 +1,100 @@
-import { useState } from "react";
-import { Link } from "react-router";
+import { useState, useEffect } from "react";
+import { Link, useParams } from "react-router";
 import PageMeta from "../../components/common/PageMeta";
 
-export default function AddUser() {
-  const [formData, setFormData] = useState({
-    staff_id: '',
-    name: '',
-    email: '',
-    mobileno: '',
-    gender: '',
-    address: '',
-    department: '',
-    designation: '',
-    joining_date: '',
-    birthday: '',
-    blood_group: '',
-    marital_status: '',
-    status: 'Active'
-  });
+interface Staff {
+  id: number;
+  staff_id: string;
+  name: string;
+  email: string;
+  mobileno: string;
+  gender: string;
+  address: string;
+  department: string;
+  designation: string;
+  joining_date: string;
+  birthday: string;
+  blood_group: string;
+  marital_status: string;
+  status: string;
+}
+
+const dummyStaff: Staff[] = [
+  {
+    id: 1,
+    staff_id: "STF001",
+    name: "John Doe",
+    email: "john.doe@sohub.com",
+    mobileno: "+1234567890",
+    gender: "Male",
+    address: "123 Main St, City",
+    department: "Sales",
+    designation: "Manager",
+    joining_date: "2023-01-15",
+    birthday: "1990-05-20",
+    blood_group: "A+",
+    marital_status: "Married",
+    status: "Active"
+  },
+  {
+    id: 2,
+    staff_id: "STF002",
+    name: "Jane Smith",
+    email: "jane.smith@sohub.com",
+    mobileno: "+1234567891",
+    gender: "Female",
+    address: "456 Oak Ave, Town",
+    department: "IT",
+    designation: "Developer",
+    joining_date: "2023-02-20",
+    birthday: "1992-08-15",
+    blood_group: "B+",
+    marital_status: "Single",
+    status: "Active"
+  }
+];
+
+export default function EditUser() {
+  const { id } = useParams();
+  const [formData, setFormData] = useState<Staff | null>(null);
+
+  useEffect(() => {
+    // Simulate fetching user data
+    const staff = dummyStaff.find(s => s.id === parseInt(id || '0'));
+    if (staff) {
+      setFormData(staff);
+    }
+  }, [id]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    console.log('Form submitted:', formData);
+    console.log('Form updated:', formData);
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value
-    });
+    if (formData) {
+      setFormData({
+        ...formData,
+        [e.target.name]: e.target.value
+      });
+    }
   };
+
+  if (!formData) {
+    return (
+      <div className="flex justify-center items-center h-64">
+        <div className="text-gray-500 dark:text-gray-400">Loading...</div>
+      </div>
+    );
+  }
 
   return (
     <>
-      <PageMeta title="Add Staff | User Management" description="Add new staff member" />
+      <PageMeta title="Edit Staff | User Management" description="Edit staff member details" />
       
       <div className="space-y-6">
         <div className="flex justify-between items-center">
-          <h1 className="text-2xl font-bold text-gray-800 dark:text-white/90">Add Staff</h1>
+          <h1 className="text-2xl font-bold text-gray-800 dark:text-white/90">Edit Staff</h1>
           <Link
             to="/user-management/user-list"
             className="text-gray-600 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-200"
@@ -260,7 +317,7 @@ export default function AddUser() {
                 type="submit"
                 className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
               >
-                Add Staff
+                Update Staff
               </button>
             </div>
           </form>

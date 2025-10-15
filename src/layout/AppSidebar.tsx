@@ -175,9 +175,25 @@ const AppSidebar: React.FC = () => {
   );
   const subMenuRefs = useRef<Record<string, HTMLDivElement | null>>({});
 
-  // const isActive = (path: string) => location.pathname === path;
   const isActive = useCallback(
-    (path: string) => location.pathname === path,
+    (path: string) => {
+      if (path === '/user-management/user-list') {
+        return location.pathname === path || location.pathname.startsWith('/user-management/edit-user/');
+      }
+      if (path === '/voice/caller-ids') {
+        return location.pathname === path || location.pathname.startsWith('/voice/caller-ids/');
+      }
+      if (path === '/voice/sound-files') {
+        return location.pathname === path || location.pathname.startsWith('/voice/sound-files/');
+      }
+      if (path === '/voice/text-to-speech') {
+        return location.pathname === path || location.pathname.startsWith('/voice/text-to-speech/');
+      }
+      if (path === '/voice/quick-call') {
+        return location.pathname === path || location.pathname.startsWith('/voice/quick-call/');
+      }
+      return location.pathname === path;
+    },
     [location.pathname]
   );
 

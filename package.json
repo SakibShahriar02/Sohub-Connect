@@ -1,7 +1,7 @@
 {
-  "name": "tailadmin-react",
+  "name": "sohub-connect",
   "private": true,
-  "version": "2.0.2",
+  "version": "beta",
   "type": "module",
   "scripts": {
     "dev": "vite",

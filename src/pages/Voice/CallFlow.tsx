@@ -15,8 +15,8 @@ export default function CallFlow() {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M3 7.5L7.5 3m0 0L12 7.5M7.5 3v13.5m13.5 0L16.5 21m0 0L12 16.5m4.5 4.5V7.5" />
               </svg>
             </div>
-            <h3 className="text-lg font-medium text-gray-800 dark:text-white/90 mb-2">Call Flow</h3>
-            <p className="text-gray-600 dark:text-gray-400">Design and manage call flow diagrams and routing logic.</p>
+            <h3 className="text-lg font-medium text-gray-800 dark:text-white/90 mb-2">Coming Soon</h3>
+            <p className="text-gray-600 dark:text-gray-400">Call Flow management feature is under development and will be available soon.</p>
           </div>
         </div>
       </div>

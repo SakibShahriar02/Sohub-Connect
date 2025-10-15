@@ -1,22 +1,167 @@
+import { useState } from "react";
+import { Link } from "react-router";
 import PageMeta from "../../components/common/PageMeta";
 
+interface TTS {
+  id: number;
+  date_time: string;
+  tts_name: string;
+  tts_text: string;
+  tts_language: string;
+  status: string;
+  assign_to: string;
+}
+
+const dummyTTS: TTS[] = [
+  {
+    id: 1,
+    date_time: "2024-01-15 10:30:00",
+    tts_name: "Welcome Greeting",
+    tts_text: "Welcome to our customer service. Please hold while we connect you to the next available agent.",
+    tts_language: "English (US)",
+    status: "Active",
+    assign_to: "Main IVR"
+  },
+  {
+    id: 2,
+    date_time: "2024-01-14 14:20:00",
+    tts_name: "Business Hours",
+    tts_text: "Our business hours are Monday to Friday, 9 AM to 6 PM. Please call back during business hours or leave a message.",
+    tts_language: "English (US)",
+    status: "Active",
+    assign_to: "After Hours"
+  },
+  {
+    id: 3,
+    date_time: "2024-01-13 09:15:00",
+    tts_name: "Queue Message",
+    tts_text: "You are currently number 3 in the queue. Your estimated wait time is 5 minutes.",
+    tts_language: "English (US)",
+    status: "Active",
+    assign_to: "Queue System"
+  },
+  {
+    id: 4,
+    date_time: "2024-01-12 16:45:00",
+    tts_name: "Spanish Welcome",
+    tts_text: "Bienvenido a nuestro servicio al cliente. Por favor espere mientras lo conectamos con el próximo agente disponible.",
+    tts_language: "Spanish (ES)",
+    status: "Active",
+    assign_to: "Spanish IVR"
+  },
+  {
+    id: 5,
+    date_time: "2024-01-11 11:20:00",
+    tts_name: "Emergency Alert",
+    tts_text: "This is an emergency notification. Please follow the instructions provided by your supervisor.",
+    tts_language: "English (US)",
+    status: "Inactive",
+    assign_to: "Emergency System"
+  },
+  {
+    id: 6,
+    date_time: "2024-01-10 08:30:00",
+    tts_name: "Thank You Message",
+    tts_text: "Thank you for calling. Your call is important to us. Have a great day!",
+    tts_language: "English (US)",
+    status: "Active",
+    assign_to: "Call End"
+  }
+];
+
 export default function TextToSpeech() {
+  const [ttsList, setTtsList] = useState<TTS[]>(dummyTTS);
+
+  const handleDelete = (id: number) => {
+    if (window.confirm('Are you sure you want to delete this TTS entry?')) {
+      setTtsList(ttsList.filter(tts => tts.id !== id));
+    }
+  };
+
   return (
     <>
       <PageMeta title="Text To Speech | Voice" description="Text to speech configuration" />
       
       <div className="space-y-6">
-        <h1 className="text-2xl font-bold text-gray-800 dark:text-white/90">Text To Speech</h1>
+        <div className="flex justify-between items-center">
+          <h1 className="text-2xl font-bold text-gray-800 dark:text-white/90">Text To Speech</h1>
+          <Link
+            to="/voice/text-to-speech/add"
+            className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors"
+          >
+            Add TTS
+          </Link>
+        </div>
         
-        <div className="rounded-2xl border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-white/[0.03]">
-          <div className="text-center py-12">
-            <div className="mb-4">
-              <svg className="mx-auto h-16 w-16 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M7.5 8.25h9m-9 3H12m-9.75 1.51c0 1.691 1.359 3.059 3.05 3.059h4.1a2.25 2.25 0 002.227-1.932L12 18.75a.75.75 0 011.5 0l.773 4.317A2.25 2.25 0 0016.5 21h4.1c1.691 0 3.05-1.368 3.05-3.059V6.309c0-1.691-1.359-3.059-3.05-3.059H16.5a2.25 2.25 0 00-2.227 1.932L12 9.75a.75.75 0 01-1.5 0L9.727 5.182A2.25 2.25 0 007.5 3.25H3.4c-1.691 0-3.05 1.368-3.05 3.059v11.582z" />
-              </svg>
-            </div>
-            <h3 className="text-lg font-medium text-gray-800 dark:text-white/90 mb-2">Text To Speech</h3>
-            <p className="text-gray-600 dark:text-gray-400">Configure text-to-speech settings and voice options.</p>
+        <div className="rounded-2xl border border-gray-200 bg-white dark:border-gray-800 dark:bg-white/[0.03] overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead className="bg-gray-50 dark:bg-gray-800/50">
+                <tr>
+                  <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider w-16">ID</th>
+                  <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">TTS Name</th>
+                  <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Text Preview</th>
+                  <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider w-24">Language</th>
+                  <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider w-20">Status</th>
+                  <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Assigned To</th>
+                  <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider w-24">Actions</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
+                {ttsList.map((tts) => (
+                  <tr key={tts.id} className="hover:bg-gray-50 dark:hover:bg-gray-800/30">
+                    <td className="px-3 py-3 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white">
+                      {tts.id}
+                    </td>
+                    <td className="px-3 py-3 text-sm text-gray-900 dark:text-white">
+                      <div className="max-w-32 truncate" title={tts.tts_name}>
+                        {tts.tts_name}
+                      </div>
+                    </td>
+                    <td className="px-3 py-3 text-sm text-gray-900 dark:text-white">
+                      <div className="max-w-40 truncate" title={tts.tts_text}>
+                        {tts.tts_text.substring(0, 40)}...
+                      </div>
+                    </td>
+                    <td className="px-3 py-3 whitespace-nowrap text-sm text-gray-900 dark:text-white">
+                      <div className="truncate" title={tts.tts_language}>
+                        {tts.tts_language.replace(' (US)', '').replace(' (ES)', '')}
+                      </div>
+                    </td>
+                    <td className="px-3 py-3 whitespace-nowrap">
+                      <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
+                        tts.status === 'Active' 
+                          ? 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400'
+                          : 'bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-400'
+                      }`}>
+                        {tts.status}
+                      </span>
+                    </td>
+                    <td className="px-3 py-3 text-sm text-gray-900 dark:text-white">
+                      <div className="max-w-32 truncate" title={tts.assign_to}>
+                        {tts.assign_to}
+                      </div>
+                    </td>
+                    <td className="px-3 py-3 whitespace-nowrap text-sm font-medium">
+                      <div className="flex space-x-2">
+                        <Link
+                          to={`/voice/text-to-speech/edit/${tts.id}`}
+                          className="text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300"
+                        >
+                          Edit
+                        </Link>
+                        <button 
+                          onClick={() => handleDelete(tts.id)}
+                          className="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300"
+                        >
+                          Del
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
         </div>
       </div>
