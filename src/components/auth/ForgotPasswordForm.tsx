@@ -1,17 +1,13 @@
 import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router";
-import { useAuth } from "../../context/AuthContext";
 
-export default function SignInForm() {
-  const [showPassword, setShowPassword] = useState(false);
+export default function ForgotPasswordForm() {
   const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
   const [captcha, setCaptcha] = useState('');
   const [captchaInput, setCaptchaInput] = useState('');
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
-  const { login } = useAuth();
 
   // Generate random captcha
   const generateCaptcha = () => {
@@ -33,7 +29,7 @@ export default function SignInForm() {
     setIsLoading(true);
 
     // Validate form
-    if (!email || !password || !captchaInput) {
+    if (!email || !captchaInput) {
       setError('Please fill in all fields');
       setIsLoading(false);
       return;
@@ -48,93 +44,46 @@ export default function SignInForm() {
       return;
     }
 
-    // Validate credentials (dummy admin/admin)
-    if (email !== 'admin' && email !== 'admin@admin.com') {
-      setError('Invalid credentials');
-      setIsLoading(false);
-      return;
-    }
-
-    if (password !== 'admin') {
-      setError('Invalid credentials');
-      setIsLoading(false);
-      return;
-    }
-
-    // Simulate loading
+    // Simulate password reset process
     setTimeout(() => {
       setIsLoading(false);
-      login();
-      navigate('/dashboard');
-    }, 1000);
+      alert('Password reset instructions have been sent to your email address.');
+      navigate('/signin');
+    }, 2000);
   };
 
   return (
     <div className="w-full">
       {/* Form Header */}
       <div className="text-center mb-8">
-        <h3 className="text-3xl font-semibold text-gray-800 mb-2">Sign In</h3>
-        <p className="text-gray-600">Enter your credentials to access your account</p>
+        <h3 className="text-3xl font-semibold text-gray-800 mb-2">Forgot Password?</h3>
+        <p className="text-gray-600">Enter your email / username and receive reset instructions via email.</p>
       </div>
 
       {/* Form */}
       <form onSubmit={handleSubmit}>
-        {/* Username Field */}
+        {/* Email/Username Field */}
         <div className="mb-6">
-          <label className="block mb-2 text-gray-800 font-medium text-sm">Username *</label>
+          <label className="block mb-2 text-gray-800 font-medium text-sm">Email / Username *</label>
           <input 
             type="text"
             className={`w-full px-4 py-3 border-2 rounded-xl text-base transition-all duration-300 bg-gray-50 ${
               error && !email ? 'border-red-500 bg-red-50' : 'border-gray-200 focus:border-blue-600 focus:bg-white focus:shadow-lg'
             }`}
-            placeholder="Enter your username"
+            placeholder="Email / Username"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
           />
         </div>
 
-        {/* Password Field */}
-        <div className="mb-6">
-          <label className="block mb-2 text-gray-800 font-medium text-sm">Password *</label>
-          <div className="relative">
-            <input
-              type={showPassword ? "text" : "password"}
-              className={`w-full px-4 py-3 pr-12 border-2 rounded-xl text-base transition-all duration-300 bg-gray-50 ${
-                error && !password ? 'border-red-500 bg-red-50' : 'border-gray-200 focus:border-blue-600 focus:bg-white focus:shadow-lg'
-              }`}
-              placeholder="Enter your password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-            />
-            <button
-              type="button"
-              onClick={() => setShowPassword(!showPassword)}
-              className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700 transition-colors p-1"
-            >
-              {showPassword ? (
-                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                  <path fillRule="evenodd" d="M3.707 2.293a1 1 0 00-1.414 1.414l14 14a1 1 0 001.414-1.414l-1.473-1.473A10.014 10.014 0 0019.542 10C18.268 5.943 14.478 3 10 3a9.958 9.958 0 00-4.512 1.074l-1.78-1.781zm4.261 4.26l1.514 1.515a2.003 2.003 0 012.45 2.45l1.514 1.514a4 4 0 00-5.478-5.478z" clipRule="evenodd" />
-                  <path d="M12.454 16.697L9.75 13.992a4 4 0 01-3.742-3.741L2.335 6.578A9.98 9.98 0 00.458 10c1.274 4.057 5.065 7 9.542 7 .847 0 1.669-.105 2.454-.303z" />
-                </svg>
-              ) : (
-                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                  <path d="M10 12a2 2 0 100-4 2 2 0 000 4z" />
-                  <path fillRule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clipRule="evenodd" />
-                </svg>
-              )}
-            </button>
-          </div>
-        </div>
-
-        {/* Forgot Password */}
+        {/* Back to Login */}
         <div className="text-right mb-6">
           <Link
-            to="/forgot-password"
+            to="/signin"
             className="text-blue-600 hover:underline text-sm"
           >
-            Forgot Password?
+            Back to Login
           </Link>
         </div>
 
@@ -183,8 +132,6 @@ export default function SignInForm() {
           </div>
         )}
 
-
-
         {/* Submit Button */}
         <button
           type="submit"
@@ -197,14 +144,14 @@ export default function SignInForm() {
                 <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                 <path className="opacity-75" fill="currentColor" d="m4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
               </svg>
-              Signing In...
+              Resetting...
             </>
           ) : (
             <>
               <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
                 <path fillRule="evenodd" d="M3 3a1 1 0 011 1v12a1 1 0 11-2 0V4a1 1 0 011-1zm7.707 3.293a1 1 0 010 1.414L9.414 9H17a1 1 0 110 2H9.414l1.293 1.293a1 1 0 01-1.414 1.414l-3-3a1 1 0 010-1.414l3-3a1 1 0 011.414 0z" clipRule="evenodd" />
               </svg>
-              Sign In
+              Reset Password
             </>
           )}
         </button>

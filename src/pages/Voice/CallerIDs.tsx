@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link } from "react-router";
 import PageMeta from "../../components/common/PageMeta";
+import { showDeleteConfirmation } from "../../utils/deleteConfirmation";
 
 interface CallerID {
   id: number;
@@ -108,10 +109,12 @@ const dummyCallerIDs: CallerID[] = [
 export default function CallerIDs() {
   const [callerIDs, setCallerIDs] = useState<CallerID[]>(dummyCallerIDs);
 
-  const handleDelete = (id: number) => {
-    if (window.confirm('Are you sure you want to delete this caller ID?')) {
-      setCallerIDs(callerIDs.filter(callerID => callerID.id !== id));
-    }
+  const handleDelete = (callerID: CallerID) => {
+    showDeleteConfirmation({
+      text: `Delete ${callerID.name}?`,
+      onConfirm: () => setCallerIDs(callerIDs.filter(c => c.id !== callerID.id)),
+      successText: 'Caller ID has been deleted successfully.'
+    });
   };
 
   return (
@@ -187,7 +190,7 @@ export default function CallerIDs() {
                           Edit
                         </Link>
                         <button 
-                          onClick={() => handleDelete(callerID.id)}
+                          onClick={() => handleDelete(callerID)}
                           className="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300"
                         >
                           Del

@@ -1,4 +1,6 @@
-import { BrowserRouter as Router, Routes, Route } from "react-router";
+import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router";
+import { AuthProvider } from "./context/AuthContext";
+import ProtectedRoute from "./components/ProtectedRoute";
 import SignIn from "./pages/AuthPages/SignIn";
 import SignUp from "./pages/AuthPages/SignUp";
 import NotFound from "./pages/OtherPage/NotFound";
@@ -25,11 +27,23 @@ import ClickToConnect from "./pages/ClickToConnect";
 import HotScan from "./pages/HotScan";
 import OperatorPanel from "./pages/Voice/PBX/OperatorPanel";
 import Extensions from "./pages/Voice/PBX/Extensions";
+import AddExtension from "./pages/Voice/PBX/AddExtension";
+import EditExtension from "./pages/Voice/PBX/EditExtension";
 import InboundRoute from "./pages/Voice/PBX/InboundRoute";
+import AddInboundRoute from "./pages/Voice/PBX/AddInboundRoute";
+import EditInboundRoute from "./pages/Voice/PBX/EditInboundRoute";
+import AddOutboundRoute from "./pages/Voice/PBX/AddOutboundRoute";
+import EditOutboundRoute from "./pages/Voice/PBX/EditOutboundRoute";
 import OutboundRoute from "./pages/Voice/PBX/OutboundRoute";
 import RingGroup from "./pages/Voice/PBX/RingGroup";
+import AddRingGroup from "./pages/Voice/PBX/AddRingGroup";
+import EditRingGroup from "./pages/Voice/PBX/EditRingGroup";
 import ClosedUserGroup from "./pages/Voice/PBX/ClosedUserGroup";
+import AddClosedUserGroup from "./pages/Voice/PBX/AddClosedUserGroup";
+import EditClosedUserGroup from "./pages/Voice/PBX/EditClosedUserGroup";
 import ApprovedTrunks from "./pages/Voice/PBX/ApprovedTrunks";
+import AddApprovedTrunk from "./pages/Voice/PBX/AddApprovedTrunk";
+import EditApprovedTrunk from "./pages/Voice/PBX/EditApprovedTrunk";
 import CallerIDs from "./pages/Voice/CallerIDs";
 import AddCallerID from "./pages/Voice/AddCallerID";
 import EditCallerID from "./pages/Voice/EditCallerID";
@@ -55,16 +69,22 @@ import RolePermission from "./pages/Settings/RolePermission";
 import Packages from "./pages/Settings/Packages";
 import Products from "./pages/Settings/Products";
 import DatabaseBackup from "./pages/Settings/DatabaseBackup";
+import Softphone from "./pages/Softphone";
+import ForgotPassword from "./pages/AuthPages/ForgotPassword";
 
 export default function App() {
   return (
-    <>
+    <AuthProvider>
       <Router>
         <ScrollToTop />
         <Routes>
-          {/* Dashboard Layout */}
-          <Route element={<AppLayout />}>
-            <Route index path="/" element={<Home />} />
+          {/* Redirect root to signin */}
+          <Route path="/" element={<Navigate to="/signin" replace />} />
+          
+          {/* Dashboard Layout - Protected */}
+          <Route element={<ProtectedRoute><AppLayout /></ProtectedRoute>}>
+            <Route path="/dashboard" element={<Home />} />
+
 
             {/* Tickets */}
             <Route path="/tickets" element={<TicketList />} />
@@ -74,15 +94,28 @@ export default function App() {
             {/* Coming Soon Pages */}
             <Route path="/click-to-connect" element={<ClickToConnect />} />
             <Route path="/hot-scan" element={<HotScan />} />
+            <Route path="/softphone" element={<Softphone />} />
 
             {/* Voice - PBX */}
             <Route path="/voice/pbx/operator-panel" element={<OperatorPanel />} />
             <Route path="/voice/pbx/extensions" element={<Extensions />} />
+            <Route path="/voice/pbx/extensions/add" element={<AddExtension />} />
+            <Route path="/voice/pbx/extensions/edit/:id" element={<EditExtension />} />
             <Route path="/voice/pbx/inbound-route" element={<InboundRoute />} />
+            <Route path="/voice/pbx/inbound-route/add" element={<AddInboundRoute />} />
+            <Route path="/voice/pbx/inbound-route/edit/:id" element={<EditInboundRoute />} />
             <Route path="/voice/pbx/outbound-route" element={<OutboundRoute />} />
+            <Route path="/voice/pbx/outbound-route/add" element={<AddOutboundRoute />} />
+            <Route path="/voice/pbx/outbound-route/edit/:id" element={<EditOutboundRoute />} />
             <Route path="/voice/pbx/ring-group" element={<RingGroup />} />
+            <Route path="/voice/pbx/ring-group/add" element={<AddRingGroup />} />
+            <Route path="/voice/pbx/ring-group/edit/:id" element={<EditRingGroup />} />
             <Route path="/voice/pbx/closed-user-group" element={<ClosedUserGroup />} />
+            <Route path="/voice/pbx/closed-user-group/add" element={<AddClosedUserGroup />} />
+            <Route path="/voice/pbx/closed-user-group/edit/:id" element={<EditClosedUserGroup />} />
             <Route path="/voice/pbx/approved-trunks" element={<ApprovedTrunks />} />
+            <Route path="/voice/pbx/approved-trunks/add" element={<AddApprovedTrunk />} />
+            <Route path="/voice/pbx/approved-trunks/edit/:id" element={<EditApprovedTrunk />} />
 
             {/* Voice - Other */}
             <Route path="/voice/caller-ids" element={<CallerIDs />} />
@@ -144,11 +177,12 @@ export default function App() {
           {/* Auth Layout */}
           <Route path="/signin" element={<SignIn />} />
           <Route path="/signup" element={<SignUp />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
 
           {/* Fallback Route */}
           <Route path="*" element={<NotFound />} />
         </Routes>
       </Router>
-    </>
+    </AuthProvider>
   );
 }

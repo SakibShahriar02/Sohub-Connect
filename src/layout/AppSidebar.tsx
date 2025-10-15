@@ -29,7 +29,7 @@ const navItems: NavItem[] = [
   {
     icon: <GridIcon />,
     name: "Dashboard",
-    path: "/",
+    path: "/dashboard",
   },
   {
     icon: <UserCircleIcon />,
@@ -144,14 +144,7 @@ const othersItems: NavItem[] = [
       { name: "Videos", path: "/videos", pro: false },
     ],
   },
-  {
-    icon: <PlugInIcon />,
-    name: "Authentication",
-    subItems: [
-      { name: "Sign In", path: "/signin", pro: false },
-      { name: "Sign Up", path: "/signup", pro: false },
-    ],
-  },
+
 ];
 
 const AppSidebar: React.FC = () => {
@@ -191,6 +184,24 @@ const AppSidebar: React.FC = () => {
       }
       if (path === '/voice/quick-call') {
         return location.pathname === path || location.pathname.startsWith('/voice/quick-call/');
+      }
+      if (path === '/voice/pbx/extensions') {
+        return location.pathname === path || location.pathname.startsWith('/voice/pbx/extensions/');
+      }
+      if (path === '/voice/pbx/inbound-route') {
+        return location.pathname === path || location.pathname.startsWith('/voice/pbx/inbound-route/');
+      }
+      if (path === '/voice/pbx/outbound-route') {
+        return location.pathname === path || location.pathname.startsWith('/voice/pbx/outbound-route/');
+      }
+      if (path === '/voice/pbx/ring-group') {
+        return location.pathname === path || location.pathname.startsWith('/voice/pbx/ring-group/');
+      }
+      if (path === '/voice/pbx/approved-trunks') {
+        return location.pathname === path || location.pathname.startsWith('/voice/pbx/approved-trunks/');
+      }
+      if (path === '/voice/pbx/closed-user-group') {
+        return location.pathname === path || location.pathname.startsWith('/voice/pbx/closed-user-group/');
       }
       return location.pathname === path;
     },
@@ -480,9 +491,9 @@ const AppSidebar: React.FC = () => {
       className={`fixed mt-16 flex flex-col lg:mt-0 top-0 px-5 left-0 bg-white dark:bg-gray-900 dark:border-gray-800 text-gray-900 h-screen transition-all duration-300 ease-in-out z-50 border-r border-gray-200 
         ${
           isExpanded || isMobileOpen
-            ? "w-[290px]"
+            ? "w-[250px]"
             : isHovered
-            ? "w-[290px]"
+            ? "w-[250px]"
             : "w-[90px]"
         }
         ${isMobileOpen ? "translate-x-0" : "-translate-x-full"}
@@ -490,20 +501,16 @@ const AppSidebar: React.FC = () => {
       onMouseEnter={() => !isExpanded && setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
-      <div
-        className={`py-8 flex ${
-          !isExpanded && !isHovered ? "lg:justify-center" : "justify-start"
-        }`}
-      >
-        <Link to="/">
+      <div className="py-8 flex justify-center">
+        <Link to="/dashboard">
           <img
             src="https://connect.sohub.com.bd/uploads/app_image/sohub-connect-logo.png"
             alt="SoHub Connect"
             className={`${
               isExpanded || isHovered || isMobileOpen
-                ? "w-[150px] h-[40px]"
-                : "w-[32px] h-[32px]"
-            } object-contain`}
+                ? "w-[180px] h-[48px]"
+                : "w-[100px] h-[40px]"
+            } object-contain transition-all duration-300`}
           />
         </Link>
       </div>
@@ -518,9 +525,7 @@ const AppSidebar: React.FC = () => {
                     : "justify-start"
                 }`}
               >
-                {isExpanded || isHovered || isMobileOpen ? (
-                  "Menu"
-                ) : (
+                {!isExpanded && !isHovered && !isMobileOpen && (
                   <HorizontaLDots className="size-6" />
                 )}
               </h2>

@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link } from "react-router";
 import PageMeta from "../../components/common/PageMeta";
+import { showDeleteConfirmation } from "../../utils/deleteConfirmation";
 
 interface Staff {
   id: number;
@@ -51,7 +52,15 @@ const dummyStaff: Staff[] = [
 ];
 
 export default function UserList() {
-  const [staff] = useState<Staff[]>(dummyStaff);
+  const [staff, setStaff] = useState<Staff[]>(dummyStaff);
+
+  const handleDelete = (member: Staff) => {
+    showDeleteConfirmation({
+      text: `Delete ${member.name}?`,
+      onConfirm: () => setStaff(staff.filter(s => s.id !== member.id)),
+      successText: 'Staff member has been deleted successfully.'
+    });
+  };
 
   return (
     <>
@@ -116,7 +125,10 @@ export default function UserList() {
                       >
                         Edit
                       </Link>
-                      <button className="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300">
+                      <button 
+                        onClick={() => handleDelete(member)}
+                        className="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300"
+                      >
                         Delete
                       </button>
                     </td>

@@ -1,189 +1,527 @@
-import { useState } from "react";
-import { Link } from "react-router";
-import { ChevronLeftIcon, EyeCloseIcon, EyeIcon } from "../../icons";
-import Label from "../form/Label";
-import Input from "../form/input/InputField";
-import Checkbox from "../form/input/Checkbox";
+import { useState, useEffect } from "react";
+import { Link, useNavigate } from "react-router";
 
 export default function SignUpForm() {
+  const [currentStep, setCurrentStep] = useState(1);
   const [showPassword, setShowPassword] = useState(false);
-  const [isChecked, setIsChecked] = useState(false);
-  return (
-    <div className="flex flex-col flex-1 w-full overflow-y-auto lg:w-1/2 no-scrollbar">
-      <div className="w-full max-w-md mx-auto mb-5 sm:pt-10">
-        <Link
-          to="/"
-          className="inline-flex items-center text-sm text-gray-500 transition-colors hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300"
-        >
-          <ChevronLeftIcon className="size-5" />
-          Back to dashboard
-        </Link>
-      </div>
-      <div className="flex flex-col justify-center flex-1 w-full max-w-md mx-auto">
-        <div>
-          <div className="mb-5 sm:mb-8">
-            <h1 className="mb-2 font-semibold text-gray-800 text-title-sm dark:text-white/90 sm:text-title-md">
-              Sign Up
-            </h1>
-            <p className="text-sm text-gray-500 dark:text-gray-400">
-              Enter your email and password to sign up!
-            </p>
-          </div>
-          <div>
-            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-5">
-              <button className="inline-flex items-center justify-center gap-3 py-3 text-sm font-normal text-gray-700 transition-colors bg-gray-100 rounded-lg px-7 hover:bg-gray-200 hover:text-gray-800 dark:bg-white/5 dark:text-white/90 dark:hover:bg-white/10">
-                <svg
-                  width="20"
-                  height="20"
-                  viewBox="0 0 20 20"
-                  fill="none"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    d="M18.7511 10.1944C18.7511 9.47495 18.6915 8.94995 18.5626 8.40552H10.1797V11.6527H15.1003C15.0011 12.4597 14.4654 13.675 13.2749 14.4916L13.2582 14.6003L15.9087 16.6126L16.0924 16.6305C17.7788 15.1041 18.7511 12.8583 18.7511 10.1944Z"
-                    fill="#4285F4"
-                  />
-                  <path
-                    d="M10.1788 18.75C12.5895 18.75 14.6133 17.9722 16.0915 16.6305L13.274 14.4916C12.5201 15.0068 11.5081 15.3666 10.1788 15.3666C7.81773 15.3666 5.81379 13.8402 5.09944 11.7305L4.99473 11.7392L2.23868 13.8295L2.20264 13.9277C3.67087 16.786 6.68674 18.75 10.1788 18.75Z"
-                    fill="#34A853"
-                  />
-                  <path
-                    d="M5.10014 11.7305C4.91165 11.186 4.80257 10.6027 4.80257 9.99992C4.80257 9.3971 4.91165 8.81379 5.09022 8.26935L5.08523 8.1534L2.29464 6.02954L2.20333 6.0721C1.5982 7.25823 1.25098 8.5902 1.25098 9.99992C1.25098 11.4096 1.5982 12.7415 2.20333 13.9277L5.10014 11.7305Z"
-                    fill="#FBBC05"
-                  />
-                  <path
-                    d="M10.1789 4.63331C11.8554 4.63331 12.9864 5.34303 13.6312 5.93612L16.1511 3.525C14.6035 2.11528 12.5895 1.25 10.1789 1.25C6.68676 1.25 3.67088 3.21387 2.20264 6.07218L5.08953 8.26943C5.81381 6.15972 7.81776 4.63331 10.1789 4.63331Z"
-                    fill="#EB4335"
-                  />
-                </svg>
-                Sign up with Google
-              </button>
-              <button className="inline-flex items-center justify-center gap-3 py-3 text-sm font-normal text-gray-700 transition-colors bg-gray-100 rounded-lg px-7 hover:bg-gray-200 hover:text-gray-800 dark:bg-white/5 dark:text-white/90 dark:hover:bg-white/10">
-                <svg
-                  width="21"
-                  className="fill-current"
-                  height="20"
-                  viewBox="0 0 21 20"
-                  fill="none"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path d="M15.6705 1.875H18.4272L12.4047 8.75833L19.4897 18.125H13.9422L9.59717 12.4442L4.62554 18.125H1.86721L8.30887 10.7625L1.51221 1.875H7.20054L11.128 7.0675L15.6705 1.875ZM14.703 16.475H16.2305L6.37054 3.43833H4.73137L14.703 16.475Z" />
-                </svg>
-                Sign up with X
-              </button>
-            </div>
-            <div className="relative py-3 sm:py-5">
-              <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-gray-200 dark:border-gray-800"></div>
-              </div>
-              <div className="relative flex justify-center text-sm">
-                <span className="p-2 text-gray-400 bg-white dark:bg-gray-900 sm:px-5 sm:py-2">
-                  Or
-                </span>
-              </div>
-            </div>
-            <form>
-              <div className="space-y-5">
-                <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
-                  {/* <!-- First Name --> */}
-                  <div className="sm:col-span-1">
-                    <Label>
-                      First Name<span className="text-error-500">*</span>
-                    </Label>
-                    <Input
-                      type="text"
-                      id="fname"
-                      name="fname"
-                      placeholder="Enter your first name"
-                    />
-                  </div>
-                  {/* <!-- Last Name --> */}
-                  <div className="sm:col-span-1">
-                    <Label>
-                      Last Name<span className="text-error-500">*</span>
-                    </Label>
-                    <Input
-                      type="text"
-                      id="lname"
-                      name="lname"
-                      placeholder="Enter your last name"
-                    />
-                  </div>
-                </div>
-                {/* <!-- Email --> */}
-                <div>
-                  <Label>
-                    Email<span className="text-error-500">*</span>
-                  </Label>
-                  <Input
-                    type="email"
-                    id="email"
-                    name="email"
-                    placeholder="Enter your email"
-                  />
-                </div>
-                {/* <!-- Password --> */}
-                <div>
-                  <Label>
-                    Password<span className="text-error-500">*</span>
-                  </Label>
-                  <div className="relative">
-                    <Input
-                      placeholder="Enter your password"
-                      type={showPassword ? "text" : "password"}
-                    />
-                    <span
-                      onClick={() => setShowPassword(!showPassword)}
-                      className="absolute z-30 -translate-y-1/2 cursor-pointer right-4 top-1/2"
-                    >
-                      {showPassword ? (
-                        <EyeIcon className="fill-gray-500 dark:fill-gray-400 size-5" />
-                      ) : (
-                        <EyeCloseIcon className="fill-gray-500 dark:fill-gray-400 size-5" />
-                      )}
-                    </span>
-                  </div>
-                </div>
-                {/* <!-- Checkbox --> */}
-                <div className="flex items-center gap-3">
-                  <Checkbox
-                    className="w-5 h-5"
-                    checked={isChecked}
-                    onChange={setIsChecked}
-                  />
-                  <p className="inline-block font-normal text-gray-500 dark:text-gray-400">
-                    By creating an account means you agree to the{" "}
-                    <span className="text-gray-800 dark:text-white/90">
-                      Terms and Conditions,
-                    </span>{" "}
-                    and our{" "}
-                    <span className="text-gray-800 dark:text-white">
-                      Privacy Policy
-                    </span>
-                  </p>
-                </div>
-                {/* <!-- Button --> */}
-                <div>
-                  <button className="flex items-center justify-center w-full px-4 py-3 text-sm font-medium text-white transition rounded-lg bg-brand-500 shadow-theme-xs hover:bg-brand-600">
-                    Sign Up
-                  </button>
-                </div>
-              </div>
-            </form>
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [captcha, setCaptcha] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const navigate = useNavigate();
 
-            <div className="mt-5">
-              <p className="text-sm font-normal text-center text-gray-700 dark:text-gray-400 sm:text-start">
-                Already have an account? {""}
-                <Link
-                  to="/signin"
-                  className="text-brand-500 hover:text-brand-600 dark:text-brand-400"
-                >
-                  Sign In
-                </Link>
-              </p>
+  const [formData, setFormData] = useState({
+    name: '',
+    email: '',
+    mobile: '',
+    nidFront: null as File | null,
+    nidBack: null as File | null,
+    tradeLicense: null as File | null,
+    username: '',
+    password: '',
+    confirmPassword: '',
+    captchaInput: '',
+    agreeTerms: false
+  });
+
+  const [errors, setErrors] = useState<Record<string, string>>({});
+
+  const totalSteps = 3;
+
+  // Generate random captcha
+  const generateCaptcha = () => {
+    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    let result = '';
+    for (let i = 0; i < 5; i++) {
+      result += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    return result;
+  };
+
+  useEffect(() => {
+    setCaptcha(generateCaptcha());
+  }, []);
+
+  const validateStep = (step: number) => {
+    const newErrors: Record<string, string> = {};
+
+    if (step === 1) {
+      if (!formData.name.trim()) newErrors.name = 'Full name is required';
+      if (!formData.email.trim()) newErrors.email = 'Email is required';
+      else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) newErrors.email = 'Invalid email format';
+      if (!formData.mobile.trim()) newErrors.mobile = 'Mobile number is required';
+      else if (!/^(017|013|019|014|015|016|018)\d{8}$/.test(formData.mobile)) newErrors.mobile = 'Invalid mobile number';
+    }
+
+    if (step === 2) {
+      if (!formData.nidFront) newErrors.nidFront = 'NID front photo is required';
+      if (!formData.nidBack) newErrors.nidBack = 'NID back photo is required';
+      if (!formData.tradeLicense) newErrors.tradeLicense = 'Trade license is required';
+    }
+
+    if (step === 3) {
+      if (!formData.username.trim()) newErrors.username = 'Username is required';
+      if (!formData.password) newErrors.password = 'Password is required';
+      if (!formData.confirmPassword) newErrors.confirmPassword = 'Confirm password is required';
+      else if (formData.password !== formData.confirmPassword) newErrors.confirmPassword = 'Passwords do not match';
+      if (!formData.captchaInput) newErrors.captchaInput = 'Security code is required';
+      else if (formData.captchaInput !== captcha) newErrors.captchaInput = 'Invalid security code';
+      if (!formData.agreeTerms) newErrors.agreeTerms = 'You must agree to terms and conditions';
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  const handleNext = () => {
+    if (validateStep(currentStep) && currentStep < totalSteps) {
+      setCurrentStep(currentStep + 1);
+    }
+  };
+
+  const handlePrev = () => {
+    if (currentStep > 1) {
+      setCurrentStep(currentStep - 1);
+    }
+  };
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!validateStep(3)) return;
+
+    setIsLoading(true);
+    
+    // Simulate registration process
+    setTimeout(() => {
+      setIsLoading(false);
+      alert('Registration successful! Please check your email for verification.');
+      navigate('/signin');
+    }, 2000);
+  };
+
+  const handleInputChange = (field: string, value: any) => {
+    setFormData(prev => ({ ...prev, [field]: value }));
+    if (errors[field]) {
+      setErrors(prev => ({ ...prev, [field]: '' }));
+    }
+  };
+
+  const handleFileChange = (field: string, file: File | null) => {
+    setFormData(prev => ({ ...prev, [field]: file }));
+    if (errors[field]) {
+      setErrors(prev => ({ ...prev, [field]: '' }));
+    }
+  };
+
+  return (
+    <div className="w-full">
+      {/* Form Header */}
+      <div className="text-center mb-8">
+        <h3 className="text-3xl font-semibold text-gray-800 mb-2">Create Account</h3>
+      </div>
+
+      {/* Progress Bar */}
+      <div className="h-1 bg-gray-200 rounded-sm mb-5 overflow-hidden">
+        <div 
+          className="h-full bg-gradient-to-r from-blue-600 to-purple-600 transition-all duration-400 rounded-sm"
+          style={{ width: `${(currentStep / totalSteps) * 100}%` }}
+        />
+      </div>
+
+      {/* Step Indicator */}
+      <div className="flex justify-center mb-8">
+        {[1, 2, 3].map((step) => (
+          <div key={step} className="flex items-center">
+            <div 
+              className={`w-10 h-10 rounded-full flex items-center justify-center font-semibold transition-all duration-300 ${
+                step < currentStep 
+                  ? 'bg-green-500 text-white' 
+                  : step === currentStep 
+                    ? 'bg-blue-600 text-white scale-110' 
+                    : 'bg-gray-200 text-gray-600'
+              }`}
+            >
+              {step < currentStep ? (
+                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                </svg>
+              ) : (
+                step
+              )}
             </div>
+            {step < 3 && (
+              <div className={`w-5 h-0.5 mx-2 ${step < currentStep ? 'bg-green-500' : 'bg-gray-200'}`} />
+            )}
+          </div>
+        ))}
+      </div>
+
+      <form onSubmit={handleSubmit}>
+        {/* Step 1: Basic Info */}
+        {currentStep === 1 && (
+          <div className="space-y-5">
+            <div>
+              <label className="block mb-2 text-gray-800 font-medium text-sm">Full Name *</label>
+              <input 
+                type="text"
+                className={`w-full px-4 py-3 border-2 rounded-xl text-base transition-all duration-300 bg-gray-50 ${
+                  errors.name ? 'border-red-500 bg-red-50' : 'border-gray-200 focus:border-blue-600 focus:bg-white focus:shadow-lg'
+                }`}
+                placeholder="Enter your full name"
+                value={formData.name}
+                onChange={(e) => handleInputChange('name', e.target.value)}
+              />
+              {errors.name && (
+                <div className="text-red-500 text-sm mt-1 flex items-center">
+                  <svg className="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                  </svg>
+                  {errors.name}
+                </div>
+              )}
+            </div>
+
+            <div>
+              <label className="block mb-2 text-gray-800 font-medium text-sm">Email Address *</label>
+              <input 
+                type="email"
+                className={`w-full px-4 py-3 border-2 rounded-xl text-base transition-all duration-300 bg-gray-50 ${
+                  errors.email ? 'border-red-500 bg-red-50' : 'border-gray-200 focus:border-blue-600 focus:bg-white focus:shadow-lg'
+                }`}
+                placeholder="Enter your email"
+                value={formData.email}
+                onChange={(e) => handleInputChange('email', e.target.value)}
+              />
+              {errors.email && (
+                <div className="text-red-500 text-sm mt-1 flex items-center">
+                  <svg className="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                  </svg>
+                  {errors.email}
+                </div>
+              )}
+            </div>
+
+            <div>
+              <label className="block mb-2 text-gray-800 font-medium text-sm">Mobile Number *</label>
+              <input 
+                type="tel"
+                className={`w-full px-4 py-3 border-2 rounded-xl text-base transition-all duration-300 bg-gray-50 ${
+                  errors.mobile ? 'border-red-500 bg-red-50' : 'border-gray-200 focus:border-blue-600 focus:bg-white focus:shadow-lg'
+                }`}
+                placeholder="Enter mobile number"
+                value={formData.mobile}
+                onChange={(e) => handleInputChange('mobile', e.target.value.replace(/[^0-9]/g, ''))}
+              />
+              {errors.mobile && (
+                <div className="text-red-500 text-sm mt-1 flex items-center">
+                  <svg className="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                  </svg>
+                  {errors.mobile}
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* Step 2: Documents */}
+        {currentStep === 2 && (
+          <div className="space-y-5">
+            <div>
+              <label className="block mb-2 text-gray-800 font-medium text-sm">NID Front Photo *</label>
+              <input 
+                type="file"
+                accept=".jpg,.jpeg,.png"
+                className={`w-full px-4 py-3 border-2 rounded-xl text-base transition-all duration-300 bg-gray-50 ${
+                  errors.nidFront ? 'border-red-500 bg-red-50' : 'border-gray-200 focus:border-blue-600 focus:bg-white'
+                }`}
+                onChange={(e) => handleFileChange('nidFront', e.target.files?.[0] || null)}
+              />
+              {errors.nidFront && (
+                <div className="text-red-500 text-sm mt-1 flex items-center">
+                  <svg className="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                  </svg>
+                  {errors.nidFront}
+                </div>
+              )}
+            </div>
+
+            <div>
+              <label className="block mb-2 text-gray-800 font-medium text-sm">NID Back Photo *</label>
+              <input 
+                type="file"
+                accept=".jpg,.jpeg,.png"
+                className={`w-full px-4 py-3 border-2 rounded-xl text-base transition-all duration-300 bg-gray-50 ${
+                  errors.nidBack ? 'border-red-500 bg-red-50' : 'border-gray-200 focus:border-blue-600 focus:bg-white'
+                }`}
+                onChange={(e) => handleFileChange('nidBack', e.target.files?.[0] || null)}
+              />
+              {errors.nidBack && (
+                <div className="text-red-500 text-sm mt-1 flex items-center">
+                  <svg className="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                  </svg>
+                  {errors.nidBack}
+                </div>
+              )}
+            </div>
+
+            <div>
+              <label className="block mb-2 text-gray-800 font-medium text-sm">Trade License *</label>
+              <input 
+                type="file"
+                accept=".jpg,.jpeg,.png"
+                className={`w-full px-4 py-3 border-2 rounded-xl text-base transition-all duration-300 bg-gray-50 ${
+                  errors.tradeLicense ? 'border-red-500 bg-red-50' : 'border-gray-200 focus:border-blue-600 focus:bg-white'
+                }`}
+                onChange={(e) => handleFileChange('tradeLicense', e.target.files?.[0] || null)}
+              />
+              {errors.tradeLicense && (
+                <div className="text-red-500 text-sm mt-1 flex items-center">
+                  <svg className="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                  </svg>
+                  {errors.tradeLicense}
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* Step 3: Account Details */}
+        {currentStep === 3 && (
+          <div className="space-y-5">
+            <div>
+              <label className="block mb-2 text-gray-800 font-medium text-sm">Username *</label>
+              <input 
+                type="text"
+                className={`w-full px-4 py-3 border-2 rounded-xl text-base transition-all duration-300 bg-gray-50 ${
+                  errors.username ? 'border-red-500 bg-red-50' : 'border-gray-200 focus:border-blue-600 focus:bg-white focus:shadow-lg'
+                }`}
+                placeholder="Choose a username"
+                value={formData.username}
+                onChange={(e) => handleInputChange('username', e.target.value)}
+              />
+              {errors.username && (
+                <div className="text-red-500 text-sm mt-1 flex items-center">
+                  <svg className="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                  </svg>
+                  {errors.username}
+                </div>
+              )}
+            </div>
+
+            <div>
+              <label className="block mb-2 text-gray-800 font-medium text-sm">Password *</label>
+              <div className="relative">
+                <input 
+                  type={showPassword ? "text" : "password"}
+                  className={`w-full px-4 py-3 pr-12 border-2 rounded-xl text-base transition-all duration-300 bg-gray-50 ${
+                    errors.password ? 'border-red-500 bg-red-50' : 'border-gray-200 focus:border-blue-600 focus:bg-white focus:shadow-lg'
+                  }`}
+                  placeholder="Create a strong password"
+                  value={formData.password}
+                  onChange={(e) => handleInputChange('password', e.target.value)}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700 transition-colors p-1"
+                >
+                  {showPassword ? (
+                    <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M3.707 2.293a1 1 0 00-1.414 1.414l14 14a1 1 0 001.414-1.414l-1.473-1.473A10.014 10.014 0 0019.542 10C18.268 5.943 14.478 3 10 3a9.958 9.958 0 00-4.512 1.074l-1.78-1.781zm4.261 4.26l1.514 1.515a2.003 2.003 0 012.45 2.45l1.514 1.514a4 4 0 00-5.478-5.478z" clipRule="evenodd" />
+                      <path d="M12.454 16.697L9.75 13.992a4 4 0 01-3.742-3.741L2.335 6.578A9.98 9.98 0 00.458 10c1.274 4.057 5.065 7 9.542 7 .847 0 1.669-.105 2.454-.303z" />
+                    </svg>
+                  ) : (
+                    <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                      <path d="M10 12a2 2 0 100-4 2 2 0 000 4z" />
+                      <path fillRule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clipRule="evenodd" />
+                    </svg>
+                  )}
+                </button>
+              </div>
+              {errors.password && (
+                <div className="text-red-500 text-sm mt-1 flex items-center">
+                  <svg className="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                  </svg>
+                  {errors.password}
+                </div>
+              )}
+            </div>
+
+            <div>
+              <label className="block mb-2 text-gray-800 font-medium text-sm">Confirm Password *</label>
+              <div className="relative">
+                <input 
+                  type={showConfirmPassword ? "text" : "password"}
+                  className={`w-full px-4 py-3 pr-12 border-2 rounded-xl text-base transition-all duration-300 bg-gray-50 ${
+                    errors.confirmPassword ? 'border-red-500 bg-red-50' : 'border-gray-200 focus:border-blue-600 focus:bg-white focus:shadow-lg'
+                  }`}
+                  placeholder="Confirm your password"
+                  value={formData.confirmPassword}
+                  onChange={(e) => handleInputChange('confirmPassword', e.target.value)}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700 transition-colors p-1"
+                >
+                  {showConfirmPassword ? (
+                    <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M3.707 2.293a1 1 0 00-1.414 1.414l14 14a1 1 0 001.414-1.414l-1.473-1.473A10.014 10.014 0 0019.542 10C18.268 5.943 14.478 3 10 3a9.958 9.958 0 00-4.512 1.074l-1.78-1.781zm4.261 4.26l1.514 1.515a2.003 2.003 0 012.45 2.45l1.514 1.514a4 4 0 00-5.478-5.478z" clipRule="evenodd" />
+                      <path d="M12.454 16.697L9.75 13.992a4 4 0 01-3.742-3.741L2.335 6.578A9.98 9.98 0 00.458 10c1.274 4.057 5.065 7 9.542 7 .847 0 1.669-.105 2.454-.303z" />
+                    </svg>
+                  ) : (
+                    <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                      <path d="M10 12a2 2 0 100-4 2 2 0 000 4z" />
+                      <path fillRule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clipRule="evenodd" />
+                    </svg>
+                  )}
+                </button>
+              </div>
+              {errors.confirmPassword && (
+                <div className="text-red-500 text-sm mt-1 flex items-center">
+                  <svg className="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                  </svg>
+                  {errors.confirmPassword}
+                </div>
+              )}
+            </div>
+
+            {/* Captcha */}
+            <div>
+              <label className="block mb-2 text-gray-800 font-medium text-sm">Security Code *</label>
+              <div className="flex items-center gap-4 mb-4">
+                <div 
+                  className="bg-gray-100 border-2 border-gray-200 rounded-lg p-3 font-mono text-lg font-bold text-gray-800 select-none min-w-[150px] text-center"
+                  style={{width: '150px', height: '50px', display: 'flex', alignItems: 'center', justifyContent: 'center'}}
+                >
+                  {captcha}
+                </div>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setCaptcha(generateCaptcha());
+                    handleInputChange('captchaInput', '');
+                  }}
+                  className="bg-gray-50 border-2 border-gray-200 rounded-lg p-2 hover:bg-blue-600 hover:text-white transition-all duration-300 hover:rotate-180"
+                >
+                  <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.601 2.566 1 1 0 11-1.885.666A5.002 5.002 0 005.999 7H9a1 1 0 010 2H4a1 1 0 01-1-1V3a1 1 0 011-1zm.008 9.057a1 1 0 011.276.61A5.002 5.002 0 0014.001 13H11a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0v-2.101a7.002 7.002 0 01-11.601-2.566 1 1 0 01.61-1.276z" clipRule="evenodd" />
+                  </svg>
+                </button>
+              </div>
+              <input 
+                type="text"
+                className={`w-full px-4 py-3 border-2 rounded-xl text-base transition-all duration-300 bg-gray-50 ${
+                  errors.captchaInput ? 'border-red-500 bg-red-50' : 'border-gray-200 focus:border-blue-600 focus:bg-white focus:shadow-lg'
+                }`}
+                placeholder="Enter security code"
+                value={formData.captchaInput}
+                onChange={(e) => handleInputChange('captchaInput', e.target.value)}
+              />
+              {errors.captchaInput && (
+                <div className="text-red-500 text-sm mt-1 flex items-center">
+                  <svg className="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                  </svg>
+                  {errors.captchaInput}
+                </div>
+              )}
+            </div>
+
+            {/* Terms Checkbox */}
+            <div>
+              <label className="flex items-center">
+                <input 
+                  type="checkbox"
+                  checked={formData.agreeTerms}
+                  onChange={(e) => handleInputChange('agreeTerms', e.target.checked)}
+                  className="mr-3 w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                />
+                <span className="text-sm text-gray-700">I agree to the Terms and Conditions *</span>
+              </label>
+              {errors.agreeTerms && (
+                <div className="text-red-500 text-sm mt-1 flex items-center">
+                  <svg className="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                  </svg>
+                  {errors.agreeTerms}
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* Navigation Buttons */}
+        <div className="flex justify-between mt-8">
+          {currentStep > 1 && (
+            <button
+              type="button"
+              onClick={handlePrev}
+              className="flex items-center gap-2 px-6 py-3 bg-gray-100 text-gray-700 rounded-xl font-semibold transition-all duration-300 hover:bg-gray-200 border-2 border-gray-200"
+            >
+              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clipRule="evenodd" />
+              </svg>
+              Previous
+            </button>
+          )}
+          
+          <div className="ml-auto">
+            {currentStep < totalSteps ? (
+              <button
+                type="button"
+                onClick={handleNext}
+                className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-xl font-semibold transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg"
+              >
+                Next
+                <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd" />
+                </svg>
+              </button>
+            ) : (
+              <button
+                type="submit"
+                disabled={isLoading}
+                className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-xl font-semibold transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {isLoading ? (
+                  <>
+                    <svg className="animate-spin w-5 h-5" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                      <path className="opacity-75" fill="currentColor" d="m4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    Processing...
+                  </>
+                ) : (
+                  <>
+                    <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                    </svg>
+                    Register
+                  </>
+                )}
+              </button>
+            )}
           </div>
         </div>
+      </form>
+
+      {/* Sign In Link */}
+      <div className="text-center mt-6">
+        <Link
+          to="/signin"
+          className="text-blue-600 hover:underline"
+        >
+          Already have an account? Sign In
+        </Link>
       </div>
     </div>
   );

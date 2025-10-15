@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link } from "react-router";
 import PageMeta from "../../components/common/PageMeta";
+import { showDeleteConfirmation } from "../../utils/deleteConfirmation";
 
 interface TTS {
   id: number;
@@ -72,10 +73,12 @@ const dummyTTS: TTS[] = [
 export default function TextToSpeech() {
   const [ttsList, setTtsList] = useState<TTS[]>(dummyTTS);
 
-  const handleDelete = (id: number) => {
-    if (window.confirm('Are you sure you want to delete this TTS entry?')) {
-      setTtsList(ttsList.filter(tts => tts.id !== id));
-    }
+  const handleDelete = (tts: TTS) => {
+    showDeleteConfirmation({
+      text: `Delete ${tts.tts_name}?`,
+      onConfirm: () => setTtsList(ttsList.filter(t => t.id !== tts.id)),
+      successText: 'TTS entry has been deleted successfully.'
+    });
   };
 
   return (
@@ -151,7 +154,7 @@ export default function TextToSpeech() {
                           Edit
                         </Link>
                         <button 
-                          onClick={() => handleDelete(tts.id)}
+                          onClick={() => handleDelete(tts)}
                           className="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300"
                         >
                           Del

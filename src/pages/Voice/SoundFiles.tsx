@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link } from "react-router";
 import PageMeta from "../../components/common/PageMeta";
+import { showDeleteConfirmation } from "../../utils/deleteConfirmation";
 
 interface SoundFile {
   id: number;
@@ -72,10 +73,12 @@ const dummySoundFiles: SoundFile[] = [
 export default function SoundFiles() {
   const [soundFiles, setSoundFiles] = useState<SoundFile[]>(dummySoundFiles);
 
-  const handleDelete = (id: number) => {
-    if (window.confirm('Are you sure you want to delete this sound file?')) {
-      setSoundFiles(soundFiles.filter(file => file.id !== id));
-    }
+  const handleDelete = (file: SoundFile) => {
+    showDeleteConfirmation({
+      text: `Delete ${file.sound_name}?`,
+      onConfirm: () => setSoundFiles(soundFiles.filter(f => f.id !== file.id)),
+      successText: 'Sound file has been deleted successfully.'
+    });
   };
 
   return (
@@ -146,7 +149,7 @@ export default function SoundFiles() {
                         Edit
                       </Link>
                       <button 
-                        onClick={() => handleDelete(file.id)}
+                        onClick={() => handleDelete(file)}
                         className="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300"
                       >
                         Delete

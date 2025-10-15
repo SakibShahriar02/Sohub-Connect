@@ -1,23 +1,293 @@
-import PageMeta from "../../components/common/PageMeta";
+import { useState } from 'react';
+import PageMeta from '../../components/common/PageMeta';
 
 export default function GlobalSetting() {
+  const [settings, setSettings] = useState({
+    // System Settings
+    system_name: 'SOHUB Connect',
+    system_timezone: 'Asia/Dhaka',
+    date_format: 'DD/MM/YYYY',
+    time_format: '24',
+    language: 'en',
+    
+    // PBX Settings
+    sip_domain: 'sip.sohub.com.bd',
+    rtp_port_range: '10000-20000',
+    max_call_duration: '3600',
+    recording_enabled: true,
+    auto_answer_enabled: false,
+    
+    // Security Settings
+    session_timeout: '30',
+    password_policy: 'strong',
+    two_factor_auth: false,
+    ip_whitelist_enabled: false,
+    
+    // Email Settings
+    smtp_host: 'smtp.gmail.com',
+    smtp_port: '587',
+    smtp_username: '',
+    smtp_password: '',
+    smtp_encryption: 'tls',
+    
+    // Notification Settings
+    email_notifications: true,
+    sms_notifications: false,
+    push_notifications: true,
+    
+    // Billing Settings
+    currency: 'BDT',
+    tax_rate: '15',
+    billing_cycle: 'monthly',
+    
+    // Backup Settings
+    auto_backup: true,
+    backup_frequency: 'daily',
+    backup_retention: '30'
+  });
+
+  const handleInputChange = (key: string, value: string | boolean) => {
+    setSettings(prev => ({
+      ...prev,
+      [key]: value
+    }));
+  };
+
+  const handleSave = () => {
+    console.log('Saving settings:', settings);
+    // Add save logic here
+  };
+
   return (
     <>
-      <PageMeta title="Global Setting | Settings" description="Global system settings and configuration" />
+      <PageMeta
+        title="Global Settings | SOHUB Connect"
+        description="Configure global system settings"
+      />
       
       <div className="space-y-6">
-        <h1 className="text-2xl font-bold text-gray-800 dark:text-white/90">Global Setting</h1>
-        
-        <div className="rounded-2xl border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-white/[0.03]">
-          <div className="text-center py-12">
-            <div className="mb-4">
-              <svg className="mx-auto h-16 w-16 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-              </svg>
+        {/* Header */}
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Global Settings</h1>
+            <p className="text-gray-600 dark:text-gray-400">Configure system-wide settings and preferences</p>
+          </div>
+          <button
+            onClick={handleSave}
+            className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+          >
+            Save Changes
+          </button>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {/* System Settings */}
+          <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 p-6">
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">System Settings</h3>
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">System Name</label>
+                <input
+                  type="text"
+                  value={settings.system_name}
+                  onChange={(e) => handleInputChange('system_name', e.target.value)}
+                  className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-800 dark:text-white"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Timezone</label>
+                <select
+                  value={settings.system_timezone}
+                  onChange={(e) => handleInputChange('system_timezone', e.target.value)}
+                  className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-800 dark:text-white"
+                >
+                  <option value="Asia/Dhaka">Asia/Dhaka</option>
+                  <option value="UTC">UTC</option>
+                  <option value="America/New_York">America/New_York</option>
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Language</label>
+                <select
+                  value={settings.language}
+                  onChange={(e) => handleInputChange('language', e.target.value)}
+                  className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-800 dark:text-white"
+                >
+                  <option value="en">English</option>
+                  <option value="bn">বাংলা</option>
+                </select>
+              </div>
             </div>
-            <h3 className="text-lg font-medium text-gray-800 dark:text-white/90 mb-2">Global Setting</h3>
-            <p className="text-gray-600 dark:text-gray-400">Configure global system settings and preferences.</p>
+          </div>
+
+          {/* PBX Settings */}
+          <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 p-6">
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">PBX Settings</h3>
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">SIP Domain</label>
+                <input
+                  type="text"
+                  value={settings.sip_domain}
+                  onChange={(e) => handleInputChange('sip_domain', e.target.value)}
+                  className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-800 dark:text-white"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">RTP Port Range</label>
+                <input
+                  type="text"
+                  value={settings.rtp_port_range}
+                  onChange={(e) => handleInputChange('rtp_port_range', e.target.value)}
+                  className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-800 dark:text-white"
+                />
+              </div>
+              <div className="flex items-center">
+                <input
+                  type="checkbox"
+                  checked={settings.recording_enabled}
+                  onChange={(e) => handleInputChange('recording_enabled', e.target.checked)}
+                  className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                />
+                <label className="ml-2 text-sm text-gray-700 dark:text-gray-300">Enable Call Recording</label>
+              </div>
+            </div>
+          </div>
+
+          {/* Security Settings */}
+          <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 p-6">
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Security Settings</h3>
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Session Timeout (minutes)</label>
+                <input
+                  type="number"
+                  value={settings.session_timeout}
+                  onChange={(e) => handleInputChange('session_timeout', e.target.value)}
+                  className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-800 dark:text-white"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Password Policy</label>
+                <select
+                  value={settings.password_policy}
+                  onChange={(e) => handleInputChange('password_policy', e.target.value)}
+                  className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-800 dark:text-white"
+                >
+                  <option value="weak">Weak</option>
+                  <option value="medium">Medium</option>
+                  <option value="strong">Strong</option>
+                </select>
+              </div>
+              <div className="flex items-center">
+                <input
+                  type="checkbox"
+                  checked={settings.two_factor_auth}
+                  onChange={(e) => handleInputChange('two_factor_auth', e.target.checked)}
+                  className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                />
+                <label className="ml-2 text-sm text-gray-700 dark:text-gray-300">Enable Two-Factor Authentication</label>
+              </div>
+            </div>
+          </div>
+
+          {/* Email Settings */}
+          <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 p-6">
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Email Settings</h3>
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">SMTP Host</label>
+                <input
+                  type="text"
+                  value={settings.smtp_host}
+                  onChange={(e) => handleInputChange('smtp_host', e.target.value)}
+                  className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-800 dark:text-white"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">SMTP Port</label>
+                <input
+                  type="text"
+                  value={settings.smtp_port}
+                  onChange={(e) => handleInputChange('smtp_port', e.target.value)}
+                  className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-800 dark:text-white"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Encryption</label>
+                <select
+                  value={settings.smtp_encryption}
+                  onChange={(e) => handleInputChange('smtp_encryption', e.target.value)}
+                  className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-800 dark:text-white"
+                >
+                  <option value="none">None</option>
+                  <option value="tls">TLS</option>
+                  <option value="ssl">SSL</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          {/* Notification Settings */}
+          <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 p-6">
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Notifications</h3>
+            <div className="space-y-4">
+              <div className="flex items-center">
+                <input
+                  type="checkbox"
+                  checked={settings.email_notifications}
+                  onChange={(e) => handleInputChange('email_notifications', e.target.checked)}
+                  className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                />
+                <label className="ml-2 text-sm text-gray-700 dark:text-gray-300">Email Notifications</label>
+              </div>
+              <div className="flex items-center">
+                <input
+                  type="checkbox"
+                  checked={settings.sms_notifications}
+                  onChange={(e) => handleInputChange('sms_notifications', e.target.checked)}
+                  className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                />
+                <label className="ml-2 text-sm text-gray-700 dark:text-gray-300">SMS Notifications</label>
+              </div>
+              <div className="flex items-center">
+                <input
+                  type="checkbox"
+                  checked={settings.push_notifications}
+                  onChange={(e) => handleInputChange('push_notifications', e.target.checked)}
+                  className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                />
+                <label className="ml-2 text-sm text-gray-700 dark:text-gray-300">Push Notifications</label>
+              </div>
+            </div>
+          </div>
+
+          {/* Billing Settings */}
+          <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 p-6">
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Billing Settings</h3>
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Currency</label>
+                <select
+                  value={settings.currency}
+                  onChange={(e) => handleInputChange('currency', e.target.value)}
+                  className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-800 dark:text-white"
+                >
+                  <option value="BDT">BDT (৳)</option>
+                  <option value="USD">USD ($)</option>
+                  <option value="EUR">EUR (€)</option>
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Tax Rate (%)</label>
+                <input
+                  type="number"
+                  value={settings.tax_rate}
+                  onChange={(e) => handleInputChange('tax_rate', e.target.value)}
+                  className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-800 dark:text-white"
+                />
+              </div>
+            </div>
           </div>
         </div>
       </div>

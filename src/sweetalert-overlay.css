@@ -1,0 +1,15 @@
+/* Disable sidebar and header when SweetAlert2 is open */
+body.swal2-shown .sidebar,
+body.swal2-shown header,
+body.swal2-shown aside {
+  pointer-events: none;
+  opacity: 0.3;
+  transition: opacity 0.3s ease;
+}
+
+/* Ensure main content is also disabled */
+body.swal2-shown main {
+  pointer-events: none;
+  opacity: 0.7;
+  transition: opacity 0.3s ease;
+}

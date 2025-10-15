@@ -10,17 +10,32 @@ export default function Home() {
         title="Dashboard | SOHUB Connect"
         description="This is Dashboard page for SOHUB Connect"
       />
-      <div className="grid grid-cols-12 gap-4 md:gap-6">
-        <div className="col-span-12 xl:col-span-4">
-          <SystemMetrics />
-        </div>
+      
+      {/* Header Section */}
+      <div className="mb-8">
+        <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
+          Dashboard Overview
+        </h1>
+        <p className="text-gray-600 dark:text-gray-400">
+          Monitor your system performance and call analytics in real-time
+        </p>
+      </div>
 
-        <div className="col-span-12 xl:col-span-8">
-          <CallsChart />
-        </div>
-
-        <div className="col-span-12">
+      {/* Main Dashboard Grid */}
+      <div className="space-y-6">
+        {/* Top Row - Metrics Cards */}
+        <div className="grid grid-cols-1 gap-6">
           <CallMetrics />
+        </div>
+
+        {/* Middle Row - Chart and System Info */}
+        <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
+          <div className="xl:col-span-2">
+            <CallsChart />
+          </div>
+          <div className="xl:col-span-1">
+            <SystemMetrics />
+          </div>
         </div>
       </div>
     </>
