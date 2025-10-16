@@ -76,6 +76,18 @@ const dummyProducts: Product[] = [
     created_at: '2025-07-23 18:56:37'
   },
   {
+    id: 8,
+    product_name: 'GRANDSTREAM GXW4104 IP-FXO GATEWAY',
+    product_title: 'GRANDSTREAM GXW4104 IP-FXO GATEWAY',
+    product_title_bn: 'GRANDSTREAM GXW4104 IP-FXO গেটওয়ে',
+    product_image: 'assets/connect/img/1753275502_grandstream-gxw4104-ip-fxo-gateway-1100x700h_jpg.png',
+    price: 0.00,
+    stock: 0,
+    product_url: 'https://www.computervillage.com.bd/grandstream-gxw4104-ip-fxo-gateway',
+    product_type: 'Gateway',
+    created_at: '2025-07-23 18:58:22'
+  },
+  {
     id: 9,
     product_name: 'Fanvil X7 20-SIP Enterprise PoE IP Phone',
     product_title: 'Fanvil X7 20-SIP Enterprise PoE IP Phone',
@@ -86,6 +98,30 @@ const dummyProducts: Product[] = [
     product_url: 'https://www.ryans.com/fanvil-x7-20-sip-enterprise-poe-ip-phone',
     product_type: 'Phone',
     created_at: '2025-07-23 19:02:31'
+  },
+  {
+    id: 10,
+    product_name: 'Yealink SIP- T48U Ultra-elegant Gigabit IP Phone',
+    product_title: 'Yealink SIP- T48U Ultra-elegant Gigabit IP Phone',
+    product_title_bn: 'Yealink SIP-T48U আলট্রা-এলিগেন্ট গিগাবিট আইপি ফোন',
+    product_image: 'assets/connect/img/1753275943_cover_cache_optimize-70_(1).png',
+    price: 0.00,
+    stock: 0,
+    product_url: 'https://www.techlandbd.com/yealink-sip-t48u-gigabit-ip-phone',
+    product_type: 'phone',
+    created_at: '2025-07-23 19:05:43'
+  },
+  {
+    id: 11,
+    product_name: 'Grandstream GRP2613 IP Phone with Adapter',
+    product_title: 'Grandstream GRP2613 IP Phone with Adapter',
+    product_title_bn: 'অ্যাডাপ্টারসহ Grandstream GRP2613 আইপি ফোন',
+    product_image: 'assets/connect/img/1753276094_grandstream-grp2613-ip-11618046026.png',
+    price: 0.00,
+    stock: 0,
+    product_url: 'https://www.ryans.com/grandstream-grp2613-ip-phone',
+    product_type: 'Phone',
+    created_at: '2025-07-23 19:08:14'
   }
 ];
 
@@ -99,7 +135,10 @@ export default function Products() {
       'Grandstream GRP2602P': 'https://connect.sohub.com.bd/assets/connect/img/grndstrm.webp',
       'GA10 SIP ATA Gateway': 'https://connect.sohub.com.bd/assets/connect/img/1753275098_11396lf4fv.png',
       'Grandstream GXW4232 32 FXS Port VoIP Gateway': 'https://connect.sohub.com.bd/assets/connect/img/1753275397_grandstream-gxw4232-32-fxs-port-voip-gateway-1100x1100_jpg.png',
-      'Fanvil X7 20-SIP Enterprise PoE IP Phone': 'https://connect.sohub.com.bd/assets/connect/img/1753274414_fanvil-ezgif_com-webp-to-jpg-converter.jpg'
+      'GRANDSTREAM GXW4104 IP-FXO GATEWAY': 'https://connect.sohub.com.bd/assets/connect/img/1753275502_grandstream-gxw4104-ip-fxo-gateway-1100x700h_jpg.png',
+      'Fanvil X7 20-SIP Enterprise PoE IP Phone': 'https://connect.sohub.com.bd/assets/connect/img/1753275751_fanvil-x7-20-sip-enterprise-poe-ip-11676714618.png',
+      'Yealink SIP- T48U Ultra-elegant Gigabit IP Phone': 'https://connect.sohub.com.bd/assets/connect/img/1753275943_cover_cache_optimize-70_(1).png',
+      'Grandstream GRP2613 IP Phone with Adapter': 'https://connect.sohub.com.bd/assets/connect/img/1753276094_grandstream-grp2613-ip-11618046026.png'
     };
     return imageMap[productName] || 'https://via.placeholder.com/300x200/f3f4f6/9ca3af?text=Product+Image';
   };

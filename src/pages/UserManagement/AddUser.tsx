@@ -4,7 +4,7 @@ import PageMeta from "../../components/common/PageMeta";
 
 export default function AddUser() {
   const [formData, setFormData] = useState({
-    staff_id: '',
+    user_id: '',
     name: '',
     email: '',
     mobileno: '',
@@ -16,8 +16,16 @@ export default function AddUser() {
     birthday: '',
     blood_group: '',
     marital_status: '',
+    role: '',
     status: 'Active'
   });
+
+  const roles = [
+    { id: 1, name: 'Super Admin' },
+    { id: 2, name: 'PBX Manager' },
+    { id: 3, name: 'Support Agent' },
+    { id: 4, name: 'Viewer' }
+  ];
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -33,11 +41,11 @@ export default function AddUser() {
 
   return (
     <>
-      <PageMeta title="Add Staff | User Management" description="Add new staff member" />
+      <PageMeta title="Add User | User Management" description="Add new user" />
       
       <div className="space-y-6">
         <div className="flex justify-between items-center">
-          <h1 className="text-2xl font-bold text-gray-800 dark:text-white/90">Add Staff</h1>
+          <h1 className="text-2xl font-bold text-gray-800 dark:text-white/90">Add User</h1>
           <Link
             to="/user-management/user-list"
             className="text-gray-600 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-200"
@@ -51,12 +59,12 @@ export default function AddUser() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  Staff ID *
+                  User ID *
                 </label>
                 <input
                   type="text"
-                  name="staff_id"
-                  value={formData.staff_id}
+                  name="user_id"
+                  value={formData.user_id}
                   onChange={handleChange}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-800 dark:border-gray-600 dark:text-white"
                   required
@@ -222,6 +230,26 @@ export default function AddUser() {
               
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  Role *
+                </label>
+                <select
+                  name="role"
+                  value={formData.role}
+                  onChange={handleChange}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-800 dark:border-gray-600 dark:text-white"
+                  required
+                >
+                  <option value="">Select Role</option>
+                  {roles.map((role) => (
+                    <option key={role.id} value={role.name}>
+                      {role.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                   Status
                 </label>
                 <select
@@ -260,7 +288,7 @@ export default function AddUser() {
                 type="submit"
                 className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
               >
-                Add Staff
+                Add User
               </button>
             </div>
           </form>

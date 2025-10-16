@@ -5,54 +5,65 @@ import { showDeleteConfirmation } from "../../utils/deleteConfirmation";
 
 interface Staff {
   id: number;
-  staff_id: string;
+  user_id: string;
   name: string;
   email: string;
   mobileno: string;
   status: string;
   designation: string;
   department: string;
+  role: string;
   joining_date: string;
 }
 
 const dummyStaff: Staff[] = [
   {
     id: 1,
-    staff_id: "STF001",
+    user_id: "USR001",
     name: "John Doe",
     email: "john.doe@sohub.com",
     mobileno: "+1234567890",
     status: "Active",
     designation: "Manager",
     department: "Sales",
+    role: "PBX Manager",
     joining_date: "2023-01-15"
   },
   {
     id: 2,
-    staff_id: "STF002",
+    user_id: "USR002",
     name: "Jane Smith",
     email: "jane.smith@sohub.com",
     mobileno: "+1234567891",
     status: "Active",
     designation: "Developer",
     department: "IT",
+    role: "Support Agent",
     joining_date: "2023-02-20"
   },
   {
     id: 3,
-    staff_id: "STF003",
+    user_id: "USR003",
     name: "Mike Johnson",
     email: "mike.johnson@sohub.com",
     mobileno: "+1234567892",
     status: "Inactive",
     designation: "Analyst",
     department: "Finance",
+    role: "Viewer",
     joining_date: "2023-03-10"
   }
 ];
 
 export default function UserList() {
   const [staff, setStaff] = useState<Staff[]>(dummyStaff);
+  const [roleFilter, setRoleFilter] = useState<string>('');
+
+  const roles = ['Super Admin', 'PBX Manager', 'Support Agent', 'Viewer'];
+  
+  const filteredStaff = roleFilter 
+    ? staff.filter(member => member.role === roleFilter)
+    : staff;
 
   const handleDelete = (member: Staff) => {
     showDeleteConfirmation({
@@ -64,25 +75,56 @@ export default function UserList() {
 
   return (
     <>
-      <PageMeta title="Staff List | User Management" description="Manage staff members" />
+      <PageMeta title="User List | User Management" description="Manage user members" />
       
       <div className="space-y-6">
         <div className="flex justify-between items-center">
-          <h1 className="text-2xl font-bold text-gray-800 dark:text-white/90">Staff List</h1>
+          <h1 className="text-2xl font-bold text-gray-800 dark:text-white/90">User List</h1>
           <Link
             to="/user-management/add-user"
             className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors"
           >
-            Add Staff
+            Add User
           </Link>
         </div>
         
-        <div className="rounded-2xl border border-gray-200 bg-white dark:border-gray-800 dark:bg-white/[0.03] overflow-hidden">
+        <div className="border-b border-gray-200 dark:border-gray-700">
+          <nav className="-mb-px flex space-x-8">
+            <button
+              onClick={() => setRoleFilter('')}
+              className={`py-2 px-1 border-b-2 font-medium text-sm ${
+                roleFilter === ''
+                  ? 'border-blue-500 text-blue-600 dark:text-blue-400'
+                  : 'border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300'
+              }`}
+            >
+              All ({staff.length})
+            </button>
+            {roles.map((role) => {
+              const count = staff.filter(s => s.role === role).length;
+              return (
+                <button
+                  key={role}
+                  onClick={() => setRoleFilter(role)}
+                  className={`py-2 px-1 border-b-2 font-medium text-sm ${
+                    roleFilter === role
+                      ? 'border-blue-500 text-blue-600 dark:text-blue-400'
+                      : 'border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300'
+                  }`}
+                >
+                  {role} ({count})
+                </button>
+              );
+            })}
+          </nav>
+        </div>
+        
+        <div className="rounded-2xl border border-gray-200 bg-white dark:border-gray-800 dark:bg-white/[0.03] overflow-hidden mt-6">
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead className="bg-gray-50 dark:bg-gray-800/50">
                 <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Staff ID</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">User ID</th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Name</th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Email</th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Mobile</th>
@@ -92,10 +134,10 @@ export default function UserList() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
-                {staff.map((member) => (
+                {filteredStaff.map((member) => (
                   <tr key={member.id} className="hover:bg-gray-50 dark:hover:bg-gray-800/30">
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white">
-                      {member.staff_id}
+                      {member.user_id}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
                       {member.name}

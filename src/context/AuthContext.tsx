@@ -17,21 +17,54 @@ export const useAuth = () => {
 };
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(() => {
+    try {
+      const authData = localStorage.getItem('authSession');
+      if (authData) {
+        const { isAuthenticated, expiresAt } = JSON.parse(authData);
+        return isAuthenticated && new Date().getTime() < expiresAt;
+      }
+      return false;
+    } catch {
+      return false;
+    }
+  });
 
   useEffect(() => {
-    const authStatus = localStorage.getItem('isAuthenticated');
-    setIsAuthenticated(authStatus === 'true');
-  }, []);
+    try {
+      const authData = localStorage.getItem('authSession');
+      if (authData) {
+        const { isAuthenticated: stored, expiresAt } = JSON.parse(authData);
+        if (stored && new Date().getTime() < expiresAt && !isAuthenticated) {
+          setIsAuthenticated(true);
+        } else if (new Date().getTime() >= expiresAt) {
+          localStorage.removeItem('authSession');
+          setIsAuthenticated(false);
+        }
+      }
+    } catch (error) {
+      console.warn('Failed to read auth session from localStorage:', error);
+    }
+  }, [isAuthenticated]);
 
   const login = () => {
-    setIsAuthenticated(true);
-    localStorage.setItem('isAuthenticated', 'true');
+    try {
+      const expiresAt = new Date().getTime() + (30 * 24 * 60 * 60 * 1000); // 30 days
+      const authData = { isAuthenticated: true, expiresAt };
+      setIsAuthenticated(true);
+      localStorage.setItem('authSession', JSON.stringify(authData));
+    } catch (error) {
+      console.warn('Failed to save auth session to localStorage:', error);
+    }
   };
 
   const logout = () => {
-    setIsAuthenticated(false);
-    localStorage.removeItem('isAuthenticated');
+    try {
+      setIsAuthenticated(false);
+      localStorage.removeItem('authSession');
+    } catch (error) {
+      console.warn('Failed to remove auth session from localStorage:', error);
+    }
   };
 
   return (
