@@ -67,7 +67,7 @@ export default function DatabaseBackup() {
       onConfirm: () => console.log('Restoring from backup:', filename),
       successText: 'Database has been restored successfully.',
       confirmButtonText: 'Restore Database',
-      icon: 'warning'
+
     });
   };
 

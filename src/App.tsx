@@ -71,6 +71,7 @@ import Products from "./pages/Settings/Products";
 import DatabaseBackup from "./pages/Settings/DatabaseBackup";
 import Softphone from "./pages/Softphone";
 import ForgotPassword from "./pages/AuthPages/ForgotPassword";
+import Support from "./pages/Support";
 
 export default function App() {
   return (
@@ -152,6 +153,7 @@ export default function App() {
 
             {/* Others Page */}
             <Route path="/profile" element={<UserProfiles />} />
+            <Route path="/support" element={<Support />} />
             <Route path="/calendar" element={<Calendar />} />
             <Route path="/blank" element={<Blank />} />
 
