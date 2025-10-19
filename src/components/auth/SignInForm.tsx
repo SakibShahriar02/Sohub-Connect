@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router";
-import { useAuth } from "../../context/AuthContext";
+import { useAuth } from "../../hooks/useAuth";
 
 export default function SignInForm() {
   const [showPassword, setShowPassword] = useState(false);
@@ -11,7 +11,7 @@ export default function SignInForm() {
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
-  const { login } = useAuth();
+  const { signIn } = useAuth();
 
   // Generate random captcha
   const generateCaptcha = () => {
@@ -48,25 +48,21 @@ export default function SignInForm() {
       return;
     }
 
-    // Validate credentials (dummy admin/admin)
-    if (email !== 'admin' && email !== 'admin@admin.com') {
-      setError('Invalid credentials');
+    try {
+      const { error } = await signIn(email, password);
+      
+      if (error) {
+        setError(error.message);
+        setCaptcha(generateCaptcha());
+        setCaptchaInput('');
+      } else {
+        navigate('/dashboard');
+      }
+    } catch (err) {
+      setError('An unexpected error occurred');
+    } finally {
       setIsLoading(false);
-      return;
     }
-
-    if (password !== 'admin') {
-      setError('Invalid credentials');
-      setIsLoading(false);
-      return;
-    }
-
-    // Simulate loading
-    setTimeout(() => {
-      setIsLoading(false);
-      login();
-      navigate('/dashboard');
-    }, 1000);
   };
 
   return (
