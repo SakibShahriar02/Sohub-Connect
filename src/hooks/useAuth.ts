@@ -9,6 +9,7 @@ interface Profile {
   role: string
   department: string | null
   designation: string | null
+  phone: string | null
   status: string
 }
 
@@ -44,16 +45,49 @@ export const useAuth = () => {
 
   const fetchProfile = async (userId: string) => {
     try {
+      console.log('Fetching profile for user:', userId)
       const { data, error } = await supabase
         .from('profiles')
         .select('*')
         .eq('id', userId)
         .single()
 
-      if (error) throw error
-      setProfile(data)
+      if (error) {
+        console.error('Profile fetch error:', error)
+        // If profile doesn't exist, create one
+        if (error.code === 'PGRST116') {
+          console.log('Profile not found, creating new profile')
+          const { data: { user } } = await supabase.auth.getUser()
+          if (user) {
+            const newProfileData = {
+              id: user.id,
+              email: user.email || '',
+              full_name: user.user_metadata?.full_name || user.email?.split('@')[0] || 'User',
+              role: 'User',
+              status: 'Active'
+            }
+            console.log('Creating profile with data:', newProfileData)
+            
+            const { data: newProfile, error: createError } = await supabase
+              .from('profiles')
+              .insert(newProfileData)
+              .select()
+              .single()
+            
+            if (createError) {
+              console.error('Error creating profile:', createError)
+            } else {
+              console.log('Profile created successfully:', newProfile)
+              setProfile(newProfile)
+            }
+          }
+        }
+      } else {
+        console.log('Profile fetched successfully:', data)
+        setProfile(data)
+      }
     } catch (error) {
-      console.error('Error fetching profile:', error)
+      console.error('Error in fetchProfile:', error)
     } finally {
       setLoading(false)
     }

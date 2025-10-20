@@ -10,29 +10,35 @@ INSERT INTO ticket_types (name, description, color) VALUES
 ('Bug Report', 'Software bugs and issues', '#8B5CF6')
 ON CONFLICT (name) DO NOTHING;
 
--- Create Super Admin user (you need to sign up first with this email)
--- Email: admin@sohub.com
--- Password: Admin@123456
-
--- After signing up, run this to update the profile to Super Admin
--- Note: Replace the UUID with the actual user ID from auth.users table
-INSERT INTO profiles (id, email, full_name, role, department, designation, status)
-SELECT 
-  id,
-  'admin@sohub.com',
-  'Super Administrator',
-  'Super Admin',
-  'IT Department',
-  'System Administrator',
-  'Active'
-FROM auth.users 
-WHERE email = 'admin@sohub.com'
-ON CONFLICT (id) DO UPDATE SET
-  role = 'Super Admin',
-  full_name = 'Super Administrator',
-  department = 'IT Department',
-  designation = 'System Administrator',
-  status = 'Active';
+-- Create Super Admin user using Supabase auth function
+-- Note: You need to create this user manually in Supabase Dashboard:
+-- Go to Authentication > Users > Add User
+-- Email: admin@sohub.com.bd
+-- Password: passw0rd
+-- Email Confirm: Yes
+-- Create profile for admin user (run after creating user in dashboard)
+DO $$
+BEGIN
+  IF EXISTS (SELECT 1 FROM auth.users WHERE email = 'admin@sohub.com.bd') THEN
+    INSERT INTO profiles (id, email, full_name, role, department, designation, status)
+    SELECT 
+      id,
+      'admin@sohub.com.bd',
+      'Super Administrator',
+      'Super Admin',
+      'IT Department',
+      'System Administrator',
+      'Active'
+    FROM auth.users 
+    WHERE email = 'admin@sohub.com.bd'
+    ON CONFLICT (id) DO UPDATE SET
+      role = 'Super Admin',
+      full_name = 'Super Administrator',
+      department = 'IT Department',
+      designation = 'System Administrator',
+      status = 'Active';
+  END IF;
+END $$;
 
 -- Insert sample extensions
 INSERT INTO extensions (display_name, extension_code, extension_no, extension_pass, assign_to, callerid, created_by) 
@@ -45,7 +51,7 @@ SELECT
   'Reception <1001>',
   p.id
 FROM profiles p 
-WHERE p.email = 'admin@sohub.com'
+WHERE p.email = 'admin@sohub.com.bd'
 ON CONFLICT (extension_code) DO NOTHING;
 
 INSERT INTO extensions (display_name, extension_code, extension_no, extension_pass, assign_to, callerid, created_by) 
@@ -58,7 +64,7 @@ SELECT
   'Sales <1002>',
   p.id
 FROM profiles p 
-WHERE p.email = 'admin@sohub.com'
+WHERE p.email = 'admin@sohub.com.bd'
 ON CONFLICT (extension_code) DO NOTHING;
 
 INSERT INTO extensions (display_name, extension_code, extension_no, extension_pass, assign_to, callerid, created_by) 
@@ -71,7 +77,7 @@ SELECT
   'Support <1003>',
   p.id
 FROM profiles p 
-WHERE p.email = 'admin@sohub.com'
+WHERE p.email = 'admin@sohub.com.bd'
 ON CONFLICT (extension_code) DO NOTHING;
 
 -- Insert sample ring group
@@ -83,7 +89,7 @@ SELECT
   30,
   p.id
 FROM profiles p 
-WHERE p.email = 'admin@sohub.com';
+WHERE p.email = 'admin@sohub.com.bd';
 
 -- Insert sample IVR menu
 INSERT INTO ivr_menus (name, description, welcome_message, timeout, max_retries, created_by)
@@ -95,7 +101,7 @@ SELECT
   3,
   p.id
 FROM profiles p 
-WHERE p.email = 'admin@sohub.com';
+WHERE p.email = 'admin@sohub.com.bd';
 
 -- Insert sample tickets
 INSERT INTO tickets (unique_id, ticket_type_id, title, description, comment, status, priority, created_by) 
@@ -109,7 +115,7 @@ SELECT
   'Medium',
   p.id
 FROM profiles p, ticket_types tt
-WHERE p.email = 'admin@sohub.com' AND tt.name = 'Technical Support';
+WHERE p.email = 'admin@sohub.com.bd' AND tt.name = 'Technical Support';
 
 -- Insert sample notifications
 INSERT INTO notifications (user_id, title, message, type)
@@ -119,7 +125,7 @@ SELECT
   'Your account has been set up successfully. You can now start managing your communication system.',
   'success'
 FROM profiles p 
-WHERE p.email = 'admin@sohub.com';
+WHERE p.email = 'admin@sohub.com.bd';
 
 INSERT INTO notifications (user_id, title, message, type)
 SELECT 
@@ -128,4 +134,64 @@ SELECT
   'All extensions and configurations are ready for use.',
   'info'
 FROM profiles p 
-WHERE p.email = 'admin@sohub.com';
+WHERE p.email = 'admin@sohub.com.bd';
+
+-- Insert sample caller IDs
+INSERT INTO caller_ids (caller_id, description, created_by)
+SELECT 
+  '+8801712345678',
+  'Main Business Line',
+  p.id
+FROM profiles p 
+WHERE p.email = 'admin@sohub.com.bd'
+ON CONFLICT (caller_id) DO NOTHING;
+
+INSERT INTO caller_ids (caller_id, description, created_by)
+SELECT 
+  '+8801987654321',
+  'Customer Support Line',
+  p.id
+FROM profiles p 
+WHERE p.email = 'admin@sohub.com.bd'
+ON CONFLICT (caller_id) DO NOTHING;
+
+-- Insert sample text-to-speech entries
+INSERT INTO text_to_speech (tts_name, tts_text, tts_language, assign_to, created_by)
+SELECT 
+  'Welcome Greeting',
+  'Welcome to SOHUB Connect. Your call is important to us. Please hold while we connect you to the next available agent.',
+  'English (US)',
+  'Main IVR',
+  p.id
+FROM profiles p 
+WHERE p.email = 'admin@sohub.com.bd';
+
+INSERT INTO text_to_speech (tts_name, tts_text, tts_language, assign_to, created_by)
+SELECT 
+  'Business Hours',
+  'Our business hours are Monday to Friday, 9 AM to 6 PM. Please call back during business hours or leave a message after the tone.',
+  'English (US)',
+  'After Hours',
+  p.id
+FROM profiles p 
+WHERE p.email = 'admin@sohub.com.bd';
+
+INSERT INTO text_to_speech (tts_name, tts_text, tts_language, assign_to, created_by)
+SELECT 
+  'Queue Message',
+  'You are currently in the queue. Your estimated wait time is 3 minutes. Thank you for your patience.',
+  'English (US)',
+  'Queue System',
+  p.id
+FROM profiles p 
+WHERE p.email = 'admin@sohub.com.bd';
+
+INSERT INTO text_to_speech (tts_name, tts_text, tts_language, assign_to, created_by)
+SELECT 
+  'Thank You Message',
+  'Thank you for calling SOHUB Connect. Have a great day!',
+  'English (US)',
+  'Call End',
+  p.id
+FROM profiles p 
+WHERE p.email = 'admin@sohub.com.bd';

@@ -1,118 +1,17 @@
-import { useState } from "react";
 import { Link } from "react-router";
 import PageMeta from "../../components/common/PageMeta";
+import { useCallerIds, CallerId } from "../../hooks/useCallerIds";
+import { useUsers } from "../../hooks/useUsers";
 import { showDeleteConfirmation } from "../../utils/deleteConfirmation";
 
-interface CallerID {
-  id: number;
-  date_time: string;
-  trunk_id: string;
-  name: string;
-  caller_id: string;
-  channels: string;
-  status: string;
-  assign_to: string;
-  inbound_id: number;
-}
-
-const dummyCallerIDs: CallerID[] = [
-  {
-    id: 1,
-    date_time: "2024-01-15 10:30:00",
-    trunk_id: "TRK001",
-    name: "Main Office",
-    caller_id: "+1234567890",
-    channels: "10",
-    status: "Active",
-    assign_to: "Sales Team, John Doe",
-    inbound_id: 101
-  },
-  {
-    id: 2,
-    date_time: "2024-01-14 14:20:00",
-    trunk_id: "TRK002",
-    name: "Support Line",
-    caller_id: "+1234567891",
-    channels: "5",
-    status: "Active",
-    assign_to: "Support Team, Jane Smith",
-    inbound_id: 102
-  },
-  {
-    id: 3,
-    date_time: "2024-01-13 09:15:00",
-    trunk_id: "TRK003",
-    name: "Marketing",
-    caller_id: "+1234567892",
-    channels: "3",
-    status: "Inactive",
-    assign_to: "Marketing Team",
-    inbound_id: 103
-  },
-  {
-    id: 4,
-    date_time: "2024-01-12 16:45:00",
-    trunk_id: "TRK004",
-    name: "Customer Service",
-    caller_id: "+1234567893",
-    channels: "8",
-    status: "Active",
-    assign_to: "CS Team, Mike Johnson",
-    inbound_id: 104
-  },
-  {
-    id: 5,
-    date_time: "2024-01-11 11:20:00",
-    trunk_id: "TRK005",
-    name: "Emergency Line",
-    caller_id: "+1234567894",
-    channels: "2",
-    status: "Active",
-    assign_to: "Emergency Response Team",
-    inbound_id: 105
-  },
-  {
-    id: 6,
-    date_time: "2024-01-10 08:30:00",
-    trunk_id: "TRK006",
-    name: "HR Department",
-    caller_id: "+1234567895",
-    channels: "4",
-    status: "Inactive",
-    assign_to: "HR Team, Sarah Wilson",
-    inbound_id: 106
-  },
-  {
-    id: 7,
-    date_time: "2024-01-09 13:15:00",
-    trunk_id: "TRK007",
-    name: "IT Helpdesk",
-    caller_id: "+1234567896",
-    channels: "6",
-    status: "Active",
-    assign_to: "IT Team, David Brown",
-    inbound_id: 107
-  },
-  {
-    id: 8,
-    date_time: "2024-01-08 15:40:00",
-    trunk_id: "TRK008",
-    name: "Finance Dept",
-    caller_id: "+1234567897",
-    channels: "3",
-    status: "Active",
-    assign_to: "Finance Team",
-    inbound_id: 108
-  }
-];
-
 export default function CallerIDs() {
-  const [callerIDs, setCallerIDs] = useState<CallerID[]>(dummyCallerIDs);
+  const { callerIds, loading, deleteCallerId } = useCallerIds();
+  const { users } = useUsers();
 
-  const handleDelete = (callerID: CallerID) => {
+  const handleDelete = (callerId: CallerId) => {
     showDeleteConfirmation({
-      text: `Delete ${callerID.name}?`,
-      onConfirm: () => setCallerIDs(callerIDs.filter(c => c.id !== callerID.id)),
+      text: `Delete ${callerId.name}?`,
+      onConfirm: () => deleteCallerId(callerId.id),
       successText: 'Caller ID has been deleted successfully.'
     });
   };
@@ -126,83 +25,96 @@ export default function CallerIDs() {
           <h1 className="text-2xl font-bold text-gray-800 dark:text-white/90">Caller IDs</h1>
           <Link
             to="/voice/caller-ids/add"
-            className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors"
+            className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors flex items-center gap-2"
           >
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+            </svg>
             Add Caller ID
           </Link>
         </div>
         
         <div className="rounded-2xl border border-gray-200 bg-white dark:border-gray-800 dark:bg-white/[0.03] overflow-hidden">
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead className="bg-gray-50 dark:bg-gray-800/50">
-                <tr>
-                  <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider w-16">ID</th>
-                  <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Name</th>
-                  <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Caller ID</th>
-                  <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider w-20">Trunk</th>
-                  <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider w-20">Channels</th>
-                  <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider w-20">Status</th>
-                  <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Assigned To</th>
-                  <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider w-24">Actions</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
-                {callerIDs.map((callerID) => (
-                  <tr key={callerID.id} className="hover:bg-gray-50 dark:hover:bg-gray-800/30">
-                    <td className="px-3 py-3 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white">
-                      {callerID.id}
-                    </td>
-                    <td className="px-3 py-3 text-sm text-gray-900 dark:text-white">
-                      <div className="max-w-32 truncate" title={callerID.name}>
-                        {callerID.name}
-                      </div>
-                    </td>
-                    <td className="px-3 py-3 whitespace-nowrap text-sm text-gray-900 dark:text-white">
-                      {callerID.caller_id}
-                    </td>
-                    <td className="px-3 py-3 whitespace-nowrap text-sm text-gray-900 dark:text-white">
-                      {callerID.trunk_id}
-                    </td>
-                    <td className="px-3 py-3 whitespace-nowrap text-sm text-gray-900 dark:text-white text-center">
-                      {callerID.channels}
-                    </td>
-                    <td className="px-3 py-3 whitespace-nowrap">
-                      <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                        callerID.status === 'Active' 
-                          ? 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400'
-                          : 'bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-400'
-                      }`}>
-                        {callerID.status}
-                      </span>
-                    </td>
-                    <td className="px-3 py-3 text-sm text-gray-900 dark:text-white">
-                      <div className="max-w-36 truncate" title={callerID.assign_to}>
-                        {callerID.assign_to}
-                      </div>
-                    </td>
-                    <td className="px-3 py-3 whitespace-nowrap text-sm font-medium">
-                      <div className="flex space-x-2">
-                        <Link
-                          to={`/voice/caller-ids/edit/${callerID.id}`}
-                          className="text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300"
-                        >
-                          Edit
-                        </Link>
-                        <button 
-                          onClick={() => handleDelete(callerID)}
-                          className="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300"
-                        >
-                          Del
-                        </button>
-                      </div>
-                    </td>
+          {loading ? (
+            <div className="flex justify-center py-8">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+            </div>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead className="bg-gray-50 dark:bg-gray-800/50">
+                  <tr>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Name</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Caller ID</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Channels</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Status</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Assigned To</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Actions</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+                </thead>
+                <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
+                  {callerIds.length === 0 ? (
+                    <tr>
+                      <td colSpan={6} className="px-6 py-8 text-center text-gray-500 dark:text-gray-400">
+                        No caller IDs found. Click "Add Caller ID" to create one.
+                      </td>
+                    </tr>
+                  ) : (
+                    callerIds.map((callerId) => (
+                      <tr key={callerId.id} className="hover:bg-gray-50 dark:hover:bg-gray-800/30">
+                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white">
+                          {callerId.name}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
+                          {callerId.caller_id}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
+                          {callerId.channels}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
+                            callerId.status === 'Active' 
+                              ? 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400'
+                              : 'bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-400'
+                          }`}>
+                            {callerId.status}
+                          </span>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
+                          {callerId.assigned_to ? users.find(u => u.id === callerId.assigned_to)?.full_name || users.find(u => u.id === callerId.assigned_to)?.email || 'Unknown' : 'Unassigned'}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                          <div className="flex items-center gap-2">
+                            <Link
+                              to={`/voice/caller-ids/edit/${callerId.id}`}
+                              className="text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300 p-1 rounded hover:bg-blue-50 dark:hover:bg-blue-900/20"
+                              title="Edit Caller ID"
+                            >
+                              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                              </svg>
+                            </Link>
+                            <button
+                              onClick={() => handleDelete(callerId)}
+                              className="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300 p-1 rounded hover:bg-red-50 dark:hover:bg-red-900/20"
+                              title="Delete Caller ID"
+                            >
+                              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                              </svg>
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </div>
+          )}
         </div>
+
+
       </div>
     </>
   );

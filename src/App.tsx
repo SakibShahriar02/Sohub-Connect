@@ -1,5 +1,7 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router";
 import { AuthProvider } from "./context/AuthContext";
+import { SidebarProvider } from "./context/SidebarContext";
+import { ThemeProvider } from "./context/ThemeContext";
 import ProtectedRoute from "./components/ProtectedRoute";
 import SignIn from "./pages/AuthPages/SignIn";
 import SignUp from "./pages/AuthPages/SignUp";
@@ -18,6 +20,7 @@ import BasicTables from "./pages/Tables/BasicTables";
 import FormElements from "./pages/Forms/FormElements";
 import Blank from "./pages/Blank";
 import AppLayout from "./layout/AppLayout";
+import RoleBasedRedirect from "./components/RoleBasedRedirect";
 import { ScrollToTop } from "./components/common/ScrollToTop";
 import Home from "./pages/Dashboard/Home";
 import TicketList from "./pages/Tickets/TicketList";
@@ -51,8 +54,8 @@ import SoundFiles from "./pages/Voice/SoundFiles";
 import AddSoundFile from "./pages/Voice/AddSoundFile";
 import EditSoundFile from "./pages/Voice/EditSoundFile";
 import TextToSpeech from "./pages/Voice/TextToSpeech";
-import AddTTS from "./pages/Voice/AddTTS";
-import EditTTS from "./pages/Voice/EditTTS";
+import AddTextToSpeech from "./pages/Voice/AddTextToSpeech";
+import EditTextToSpeech from "./pages/Voice/EditTextToSpeech";
 import QuickCall from "./pages/Voice/QuickCall";
 import AddQuickCall from "./pages/Voice/AddQuickCall";
 import EditQuickCall from "./pages/Voice/EditQuickCall";
@@ -72,108 +75,111 @@ import DatabaseBackup from "./pages/Settings/DatabaseBackup";
 import Softphone from "./pages/Softphone";
 import ForgotPassword from "./pages/AuthPages/ForgotPassword";
 import Support from "./pages/Support";
+import Notifications from "./pages/Notifications";
 
 export default function App() {
   return (
-    <AuthProvider>
-      <Router>
+    <ThemeProvider>
+      <SidebarProvider>
+        <AuthProvider>
+          <Router>
         <ScrollToTop />
         <Routes>
-          {/* Redirect root to signin */}
-          <Route path="/" element={<Navigate to="/signin" replace />} />
+          {/* Redirect root based on role */}
+          <Route path="/" element={<RoleBasedRedirect />} />
           
           {/* Dashboard Layout - Protected */}
           <Route element={<ProtectedRoute><AppLayout /></ProtectedRoute>}>
             <Route path="/dashboard" element={<Home />} />
 
-
             {/* Tickets */}
-            <Route path="/tickets" element={<TicketList />} />
-            <Route path="/tickets/add" element={<AddTicket />} />
-            <Route path="/tickets/:id" element={<TicketDetail />} />
+            <Route path="tickets" element={<TicketList />} />
+            <Route path="tickets/add" element={<AddTicket />} />
+            <Route path="tickets/:id" element={<TicketDetail />} />
 
             {/* Coming Soon Pages */}
-            <Route path="/click-to-connect" element={<ClickToConnect />} />
-            <Route path="/hot-scan" element={<HotScan />} />
-            <Route path="/softphone" element={<Softphone />} />
+            <Route path="click-to-connect" element={<ClickToConnect />} />
+            <Route path="hot-scan" element={<HotScan />} />
+            <Route path="softphone" element={<Softphone />} />
 
             {/* Voice - PBX */}
-            <Route path="/voice/pbx/operator-panel" element={<OperatorPanel />} />
-            <Route path="/voice/pbx/extensions" element={<Extensions />} />
-            <Route path="/voice/pbx/extensions/add" element={<AddExtension />} />
-            <Route path="/voice/pbx/extensions/edit/:id" element={<EditExtension />} />
-            <Route path="/voice/pbx/inbound-route" element={<InboundRoute />} />
-            <Route path="/voice/pbx/inbound-route/add" element={<AddInboundRoute />} />
-            <Route path="/voice/pbx/inbound-route/edit/:id" element={<EditInboundRoute />} />
-            <Route path="/voice/pbx/outbound-route" element={<OutboundRoute />} />
-            <Route path="/voice/pbx/outbound-route/add" element={<AddOutboundRoute />} />
-            <Route path="/voice/pbx/outbound-route/edit/:id" element={<EditOutboundRoute />} />
-            <Route path="/voice/pbx/ring-group" element={<RingGroup />} />
-            <Route path="/voice/pbx/ring-group/add" element={<AddRingGroup />} />
-            <Route path="/voice/pbx/ring-group/edit/:id" element={<EditRingGroup />} />
-            <Route path="/voice/pbx/closed-user-group" element={<ClosedUserGroup />} />
-            <Route path="/voice/pbx/closed-user-group/add" element={<AddClosedUserGroup />} />
-            <Route path="/voice/pbx/closed-user-group/edit/:id" element={<EditClosedUserGroup />} />
-            <Route path="/voice/pbx/approved-trunks" element={<ApprovedTrunks />} />
-            <Route path="/voice/pbx/approved-trunks/add" element={<AddApprovedTrunk />} />
-            <Route path="/voice/pbx/approved-trunks/edit/:id" element={<EditApprovedTrunk />} />
+            <Route path="voice/pbx/operator-panel" element={<OperatorPanel />} />
+            <Route path="voice/pbx/extensions" element={<Extensions />} />
+            <Route path="voice/pbx/extensions/add" element={<AddExtension />} />
+            <Route path="voice/pbx/extensions/edit/:id" element={<EditExtension />} />
+            <Route path="voice/pbx/inbound-route" element={<InboundRoute />} />
+            <Route path="voice/pbx/inbound-route/add" element={<AddInboundRoute />} />
+            <Route path="voice/pbx/inbound-route/edit/:id" element={<EditInboundRoute />} />
+            <Route path="voice/pbx/outbound-route" element={<OutboundRoute />} />
+            <Route path="voice/pbx/outbound-route/add" element={<AddOutboundRoute />} />
+            <Route path="voice/pbx/outbound-route/edit/:id" element={<EditOutboundRoute />} />
+            <Route path="voice/pbx/ring-group" element={<RingGroup />} />
+            <Route path="voice/pbx/ring-group/add" element={<AddRingGroup />} />
+            <Route path="voice/pbx/ring-group/edit/:id" element={<EditRingGroup />} />
+            <Route path="voice/pbx/closed-user-group" element={<ClosedUserGroup />} />
+            <Route path="voice/pbx/closed-user-group/add" element={<AddClosedUserGroup />} />
+            <Route path="voice/pbx/closed-user-group/edit/:id" element={<EditClosedUserGroup />} />
+            <Route path="voice/pbx/approved-trunks" element={<ApprovedTrunks />} />
+            <Route path="voice/pbx/approved-trunks/add" element={<AddApprovedTrunk />} />
+            <Route path="voice/pbx/approved-trunks/edit/:id" element={<EditApprovedTrunk />} />
 
             {/* Voice - Other */}
-            <Route path="/voice/caller-ids" element={<CallerIDs />} />
-            <Route path="/voice/caller-ids/add" element={<AddCallerID />} />
-            <Route path="/voice/caller-ids/edit/:id" element={<EditCallerID />} />
-            <Route path="/voice/sound-files" element={<SoundFiles />} />
-            <Route path="/voice/sound-files/add" element={<AddSoundFile />} />
-            <Route path="/voice/sound-files/edit/:id" element={<EditSoundFile />} />
-            <Route path="/voice/text-to-speech" element={<TextToSpeech />} />
-            <Route path="/voice/text-to-speech/add" element={<AddTTS />} />
-            <Route path="/voice/text-to-speech/edit/:id" element={<EditTTS />} />
-            <Route path="/voice/quick-call" element={<QuickCall />} />
-            <Route path="/voice/quick-call/add" element={<AddQuickCall />} />
-            <Route path="/voice/quick-call/edit/:id" element={<EditQuickCall />} />
-            <Route path="/voice/call-flow" element={<CallFlow />} />
+            <Route path="voice/caller-ids" element={<CallerIDs />} />
+            <Route path="voice/caller-ids/add" element={<AddCallerID />} />
+            <Route path="voice/caller-ids/edit/:id" element={<EditCallerID />} />
+            <Route path="voice/sound-files" element={<SoundFiles />} />
+            <Route path="voice/sound-files/add" element={<AddSoundFile />} />
+            <Route path="voice/sound-files/edit/:id" element={<EditSoundFile />} />
+            <Route path="voice/text-to-speech" element={<TextToSpeech />} />
+            <Route path="voice/text-to-speech/add" element={<AddTextToSpeech />} />
+            <Route path="voice/text-to-speech/edit/:id" element={<EditTextToSpeech />} />
+            <Route path="voice/quick-call" element={<QuickCall />} />
+            <Route path="voice/quick-call/add" element={<AddQuickCall />} />
+            <Route path="voice/quick-call/edit/:id" element={<EditQuickCall />} />
+            <Route path="voice/call-flow" element={<CallFlow />} />
 
             {/* Reports */}
-            <Route path="/reports/call-reports" element={<CallReports />} />
-            <Route path="/reports/transaction-history" element={<TransactionHistory />} />
-            <Route path="/reports/deleted-extension-logs" element={<DeletedExtensionLogs />} />
+            <Route path="reports/call-reports" element={<CallReports />} />
+            <Route path="reports/transaction-history" element={<TransactionHistory />} />
+            <Route path="reports/deleted-extension-logs" element={<DeletedExtensionLogs />} />
 
             {/* User Management */}
-            <Route path="/user-management/user-list" element={<UserList />} />
-            <Route path="/user-management/add-user" element={<AddUser />} />
-            <Route path="/user-management/edit-user/:id" element={<EditUser />} />
-            <Route path="/user-management/login-deactivate" element={<LoginDeactivate />} />
+            <Route path="user-management/user-list" element={<UserList />} />
+            <Route path="user-management/add-user" element={<AddUser />} />
+            <Route path="user-management/edit-user/:id" element={<EditUser />} />
+            <Route path="user-management/login-deactivate" element={<LoginDeactivate />} />
 
             {/* Settings */}
-            <Route path="/settings/global-setting" element={<GlobalSetting />} />
-            <Route path="/settings/role-permission" element={<RolePermission />} />
-            <Route path="/settings/packages" element={<Packages />} />
-            <Route path="/settings/products" element={<Products />} />
-            <Route path="/settings/database-backup" element={<DatabaseBackup />} />
+            <Route path="settings/global-setting" element={<GlobalSetting />} />
+            <Route path="settings/role-permission" element={<RolePermission />} />
+            <Route path="settings/packages" element={<Packages />} />
+            <Route path="settings/products" element={<Products />} />
+            <Route path="settings/database-backup" element={<DatabaseBackup />} />
 
             {/* Others Page */}
-            <Route path="/profile" element={<UserProfiles />} />
-            <Route path="/support" element={<Support />} />
-            <Route path="/calendar" element={<Calendar />} />
-            <Route path="/blank" element={<Blank />} />
+            <Route path="profile" element={<UserProfiles />} />
+            <Route path="support" element={<Support />} />
+            <Route path="notifications" element={<Notifications />} />
+            <Route path="calendar" element={<Calendar />} />
+            <Route path="blank" element={<Blank />} />
 
             {/* Forms */}
-            <Route path="/form-elements" element={<FormElements />} />
+            <Route path="form-elements" element={<FormElements />} />
 
             {/* Tables */}
-            <Route path="/basic-tables" element={<BasicTables />} />
+            <Route path="basic-tables" element={<BasicTables />} />
 
             {/* Ui Elements */}
-            <Route path="/alerts" element={<Alerts />} />
-            <Route path="/avatars" element={<Avatars />} />
-            <Route path="/badge" element={<Badges />} />
-            <Route path="/buttons" element={<Buttons />} />
-            <Route path="/images" element={<Images />} />
-            <Route path="/videos" element={<Videos />} />
+            <Route path="alerts" element={<Alerts />} />
+            <Route path="avatars" element={<Avatars />} />
+            <Route path="badge" element={<Badges />} />
+            <Route path="buttons" element={<Buttons />} />
+            <Route path="images" element={<Images />} />
+            <Route path="videos" element={<Videos />} />
 
             {/* Charts */}
-            <Route path="/line-chart" element={<LineChart />} />
-            <Route path="/bar-chart" element={<BarChart />} />
+            <Route path="line-chart" element={<LineChart />} />
+            <Route path="bar-chart" element={<BarChart />} />
           </Route>
 
           {/* Auth Layout */}
@@ -183,8 +189,10 @@ export default function App() {
 
           {/* Fallback Route */}
           <Route path="*" element={<NotFound />} />
-        </Routes>
-      </Router>
-    </AuthProvider>
+          </Routes>
+          </Router>
+        </AuthProvider>
+      </SidebarProvider>
+    </ThemeProvider>
   );
 }

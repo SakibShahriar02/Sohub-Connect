@@ -1,11 +1,28 @@
--- SOHUB Connect Database Schema
+-- SOHUB Connect Database Schema (Drop & Recreate)
 -- Run this in Supabase SQL Editor
 
--- Enable RLS (Row Level Security)
-ALTER DATABASE postgres SET "app.jwt_secret" TO 'your-jwt-secret';
+-- =========================
+-- DROP TABLES (if exists)
+-- =========================
+DROP TABLE IF EXISTS text_to_speech CASCADE;
+DROP TABLE IF EXISTS caller_ids CASCADE;
+DROP TABLE IF EXISTS notifications CASCADE;
+DROP TABLE IF EXISTS ivr_options CASCADE;
+DROP TABLE IF EXISTS ivr_menus CASCADE;
+DROP TABLE IF EXISTS ring_group_members CASCADE;
+DROP TABLE IF EXISTS ring_groups CASCADE;
+DROP TABLE IF EXISTS call_logs CASCADE;
+DROP TABLE IF EXISTS tickets CASCADE;
+DROP TABLE IF EXISTS ticket_types CASCADE;
+DROP TABLE IF EXISTS extensions CASCADE;
+DROP TABLE IF EXISTS profiles CASCADE;
 
--- Create profiles table (extends auth.users)
-CREATE TABLE IF NOT EXISTS profiles (
+-- =========================
+-- CREATE TABLES
+-- =========================
+
+-- Profiles
+CREATE TABLE profiles (
   id UUID REFERENCES auth.users(id) ON DELETE CASCADE PRIMARY KEY,
   email TEXT UNIQUE NOT NULL,
   full_name TEXT,
@@ -18,8 +35,8 @@ CREATE TABLE IF NOT EXISTS profiles (
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
--- Create extensions table
-CREATE TABLE IF NOT EXISTS extensions (
+-- Extensions
+CREATE TABLE extensions (
   id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
   display_name TEXT NOT NULL,
   extension_code TEXT UNIQUE NOT NULL,
@@ -33,8 +50,8 @@ CREATE TABLE IF NOT EXISTS extensions (
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
--- Create ticket_types table
-CREATE TABLE IF NOT EXISTS ticket_types (
+-- Ticket Types
+CREATE TABLE ticket_types (
   id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
   name TEXT UNIQUE NOT NULL,
   description TEXT,
@@ -43,8 +60,8 @@ CREATE TABLE IF NOT EXISTS ticket_types (
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
--- Create tickets table
-CREATE TABLE IF NOT EXISTS tickets (
+-- Tickets
+CREATE TABLE tickets (
   id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
   unique_id TEXT UNIQUE NOT NULL,
   ticket_type_id UUID REFERENCES ticket_types(id),
@@ -59,8 +76,8 @@ CREATE TABLE IF NOT EXISTS tickets (
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
--- Create call_logs table
-CREATE TABLE IF NOT EXISTS call_logs (
+-- Call Logs
+CREATE TABLE call_logs (
   id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
   caller_id TEXT,
   callee_id TEXT,
@@ -72,8 +89,8 @@ CREATE TABLE IF NOT EXISTS call_logs (
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
--- Create ring_groups table
-CREATE TABLE IF NOT EXISTS ring_groups (
+-- Ring Groups
+CREATE TABLE ring_groups (
   id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
   name TEXT NOT NULL,
   description TEXT,
@@ -84,8 +101,8 @@ CREATE TABLE IF NOT EXISTS ring_groups (
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
--- Create ring_group_members table
-CREATE TABLE IF NOT EXISTS ring_group_members (
+-- Ring Group Members
+CREATE TABLE ring_group_members (
   id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
   ring_group_id UUID REFERENCES ring_groups(id) ON DELETE CASCADE,
   extension_id UUID REFERENCES extensions(id) ON DELETE CASCADE,
@@ -94,8 +111,8 @@ CREATE TABLE IF NOT EXISTS ring_group_members (
   UNIQUE(ring_group_id, extension_id)
 );
 
--- Create ivr_menus table
-CREATE TABLE IF NOT EXISTS ivr_menus (
+-- IVR Menus
+CREATE TABLE ivr_menus (
   id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
   name TEXT NOT NULL,
   description TEXT,
@@ -107,8 +124,8 @@ CREATE TABLE IF NOT EXISTS ivr_menus (
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
--- Create ivr_options table
-CREATE TABLE IF NOT EXISTS ivr_options (
+-- IVR Options
+CREATE TABLE ivr_options (
   id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
   ivr_menu_id UUID REFERENCES ivr_menus(id) ON DELETE CASCADE,
   digit TEXT NOT NULL,
@@ -119,8 +136,8 @@ CREATE TABLE IF NOT EXISTS ivr_options (
   UNIQUE(ivr_menu_id, digit)
 );
 
--- Create notifications table
-CREATE TABLE IF NOT EXISTS notifications (
+-- Notifications
+CREATE TABLE notifications (
   id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
   user_id UUID REFERENCES profiles(id) ON DELETE CASCADE,
   title TEXT NOT NULL,
@@ -130,7 +147,35 @@ CREATE TABLE IF NOT EXISTS notifications (
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
--- Enable Row Level Security
+-- Caller IDs
+CREATE TABLE caller_ids (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  name TEXT NOT NULL,
+  caller_id TEXT UNIQUE NOT NULL,
+  channels INTEGER DEFAULT 1,
+  status TEXT DEFAULT 'Active' CHECK (status IN ('Active', 'Inactive')),
+  assigned_to UUID REFERENCES profiles(id),
+  created_by UUID REFERENCES profiles(id),
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- Text to Speech
+CREATE TABLE text_to_speech (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  tts_name TEXT NOT NULL,
+  tts_text TEXT NOT NULL,
+  tts_language TEXT DEFAULT 'English (US)',
+  assign_to TEXT,
+  status TEXT DEFAULT 'Active' CHECK (status IN ('Active', 'Inactive')),
+  created_by UUID REFERENCES profiles(id),
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- =========================
+-- Enable RLS
+-- =========================
 ALTER TABLE profiles ENABLE ROW LEVEL SECURITY;
 ALTER TABLE extensions ENABLE ROW LEVEL SECURITY;
 ALTER TABLE tickets ENABLE ROW LEVEL SECURITY;
@@ -141,46 +186,67 @@ ALTER TABLE ring_group_members ENABLE ROW LEVEL SECURITY;
 ALTER TABLE ivr_menus ENABLE ROW LEVEL SECURITY;
 ALTER TABLE ivr_options ENABLE ROW LEVEL SECURITY;
 ALTER TABLE notifications ENABLE ROW LEVEL SECURITY;
+ALTER TABLE caller_ids ENABLE ROW LEVEL SECURITY;
+ALTER TABLE text_to_speech ENABLE ROW LEVEL SECURITY;
 
--- Create RLS Policies
--- Profiles policies
+-- =========================
+-- RLS Policies
+-- =========================
 CREATE POLICY "Users can view own profile" ON profiles FOR SELECT USING (auth.uid() = id);
 CREATE POLICY "Users can update own profile" ON profiles FOR UPDATE USING (auth.uid() = id);
 CREATE POLICY "Admins can view all profiles" ON profiles FOR SELECT USING (
   EXISTS (SELECT 1 FROM profiles WHERE id = auth.uid() AND role IN ('Super Admin', 'Admin'))
 );
 
--- Extensions policies
 CREATE POLICY "Users can view extensions" ON extensions FOR SELECT USING (true);
 CREATE POLICY "Admins can manage extensions" ON extensions FOR ALL USING (
   EXISTS (SELECT 1 FROM profiles WHERE id = auth.uid() AND role IN ('Super Admin', 'Admin'))
 );
 
--- Tickets policies
 CREATE POLICY "Users can view own tickets" ON tickets FOR SELECT USING (
   created_by = auth.uid() OR assigned_to = auth.uid() OR
   EXISTS (SELECT 1 FROM profiles WHERE id = auth.uid() AND role IN ('Super Admin', 'Admin'))
 );
 
--- Notifications policies
 CREATE POLICY "Users can view own notifications" ON notifications FOR SELECT USING (user_id = auth.uid());
 CREATE POLICY "Users can update own notifications" ON notifications FOR UPDATE USING (user_id = auth.uid());
 
--- Create functions for updated_at timestamps
+CREATE POLICY "Users can view caller ids" ON caller_ids FOR SELECT USING (true);
+CREATE POLICY "Admins can manage caller ids" ON caller_ids FOR ALL USING (
+  EXISTS (SELECT 1 FROM profiles WHERE id = auth.uid() AND role IN ('Super Admin', 'Admin'))
+);
+
+CREATE POLICY "Users can view tts" ON text_to_speech FOR SELECT USING (true);
+CREATE POLICY "Admins can manage tts" ON text_to_speech FOR ALL USING (
+  EXISTS (SELECT 1 FROM profiles WHERE id = auth.uid() AND role IN ('Super Admin', 'Admin'))
+);
+
+-- =========================
+-- Trigger Functions
+-- =========================
 CREATE OR REPLACE FUNCTION update_updated_at_column()
 RETURNS TRIGGER AS $$
 BEGIN
     NEW.updated_at = NOW();
     RETURN NEW;
 END;
-$$ language 'plpgsql';
+$$ LANGUAGE plpgsql;
 
--- Create triggers for updated_at
 CREATE TRIGGER update_profiles_updated_at BEFORE UPDATE ON profiles FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 CREATE TRIGGER update_extensions_updated_at BEFORE UPDATE ON extensions FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 CREATE TRIGGER update_tickets_updated_at BEFORE UPDATE ON tickets FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+CREATE TRIGGER update_caller_ids_updated_at BEFORE UPDATE ON caller_ids FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+CREATE TRIGGER update_text_to_speech_updated_at BEFORE UPDATE ON text_to_speech FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
--- Create function to handle new user registration
+-- =========================
+-- Drop existing trigger & function (safe rerun)
+-- =========================
+DROP TRIGGER IF EXISTS on_auth_user_created ON auth.users;
+DROP FUNCTION IF EXISTS public.handle_new_user();
+
+-- =========================
+-- Handle New User Trigger
+-- =========================
 CREATE OR REPLACE FUNCTION public.handle_new_user()
 RETURNS TRIGGER AS $$
 BEGIN
@@ -190,7 +256,7 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
--- Create trigger for new user registration
 CREATE TRIGGER on_auth_user_created
   AFTER INSERT ON auth.users
-  FOR EACH ROW EXECUTE FUNCTION public.handle_new_user();
+  FOR EACH ROW
+  EXECUTE FUNCTION public.handle_new_user();

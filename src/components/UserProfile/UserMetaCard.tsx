@@ -4,9 +4,11 @@ import Button from "../ui/button/Button";
 import Input from "../form/input/InputField";
 import Label from "../form/Label";
 import { useState } from "react";
+import { useAuth } from "../../hooks/useAuth";
 
 export default function UserMetaCard() {
   const { isOpen, openModal, closeModal } = useModal();
+  const { user, profile } = useAuth();
   const [profileImage, setProfileImage] = useState("/images/user/owner.jpg");
   
   const handleSave = () => {
@@ -48,16 +50,20 @@ export default function UserMetaCard() {
             </div>
             <div className="order-3 xl:order-2">
               <h4 className="mb-2 text-lg font-semibold text-center text-gray-800 dark:text-white/90 xl:text-left">
-                Musharof Chowdhury
+                {profile?.full_name || user?.email?.split('@')[0] || 'User'}
               </h4>
               <div className="flex flex-col items-center gap-1 text-center xl:flex-row xl:gap-3 xl:text-left">
                 <p className="text-sm text-gray-500 dark:text-gray-400">
-                  Team Manager
+                  {profile?.designation || 'Team Member'}
                 </p>
-                <div className="hidden h-3.5 w-px bg-gray-300 dark:bg-gray-700 xl:block"></div>
-                <p className="text-sm text-gray-500 dark:text-gray-400">
-                  Arizona, United States
-                </p>
+                {profile?.department && (
+                  <>
+                    <div className="hidden h-3.5 w-px bg-gray-300 dark:bg-gray-700 xl:block"></div>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">
+                      {profile.department}
+                    </p>
+                  </>
+                )}
               </div>
             </div>
             <div className="flex items-center order-2 gap-2 grow xl:order-3 xl:justify-end">
@@ -245,29 +251,29 @@ export default function UserMetaCard() {
                 </h5>
 
                 <div className="grid grid-cols-1 gap-x-6 gap-y-5 lg:grid-cols-2">
-                  <div className="col-span-2 lg:col-span-1">
-                    <Label>First Name</Label>
-                    <Input type="text" value="Musharof" />
-                  </div>
-
-                  <div className="col-span-2 lg:col-span-1">
-                    <Label>Last Name</Label>
-                    <Input type="text" value="Chowdhury" />
+                  <div className="col-span-2">
+                    <Label>Full Name</Label>
+                    <Input type="text" value={profile?.full_name || ''} />
                   </div>
 
                   <div className="col-span-2 lg:col-span-1">
                     <Label>Email Address</Label>
-                    <Input type="text" value="randomuser@pimjo.com" />
+                    <Input type="text" value={profile?.email || user?.email || ''} disabled />
                   </div>
 
                   <div className="col-span-2 lg:col-span-1">
                     <Label>Phone</Label>
-                    <Input type="text" value="+09 363 398 46" />
+                    <Input type="text" value={profile?.phone || ''} />
                   </div>
 
-                  <div className="col-span-2">
-                    <Label>Bio</Label>
-                    <Input type="text" value="Team Manager" />
+                  <div className="col-span-2 lg:col-span-1">
+                    <Label>Department</Label>
+                    <Input type="text" value={profile?.department || ''} />
+                  </div>
+
+                  <div className="col-span-2 lg:col-span-1">
+                    <Label>Designation</Label>
+                    <Input type="text" value={profile?.designation || ''} />
                   </div>
                 </div>
               </div>

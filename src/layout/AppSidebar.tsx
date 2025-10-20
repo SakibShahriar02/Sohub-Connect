@@ -174,7 +174,10 @@ const AppSidebar: React.FC = () => {
         return location.pathname === path || location.pathname.startsWith('/user-management/edit-user/');
       }
       if (path === '/voice/caller-ids') {
-        return location.pathname === path || location.pathname.startsWith('/voice/caller-ids/');
+        return location.pathname === path || 
+               location.pathname.startsWith('/voice/caller-ids/') ||
+               location.pathname === '/voice/caller-ids/add' ||
+               location.pathname.startsWith('/voice/caller-ids/edit/');
       }
       if (path === '/voice/sound-files') {
         return location.pathname === path || location.pathname.startsWith('/voice/sound-files/');

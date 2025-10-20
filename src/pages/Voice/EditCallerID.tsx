@@ -1,228 +1,182 @@
-import { useState, useEffect } from "react";
-import { Link, useParams } from "react-router";
-import PageMeta from "../../components/common/PageMeta";
-
-interface CallerID {
-  id: number;
-  date_time: string;
-  trunk_id: string;
-  name: string;
-  caller_id: string;
-  channels: string;
-  status: string;
-  assign_to: string;
-  inbound_id: number;
-}
-
-const dummyCallerIDs: CallerID[] = [
-  {
-    id: 1,
-    date_time: "2024-01-15 10:30:00",
-    trunk_id: "TRK001",
-    name: "Main Office",
-    caller_id: "+1234567890",
-    channels: "10",
-    status: "Active",
-    assign_to: "Sales Team, John Doe",
-    inbound_id: 101
-  },
-  {
-    id: 2,
-    date_time: "2024-01-14 14:20:00",
-    trunk_id: "TRK002",
-    name: "Support Line",
-    caller_id: "+1234567891",
-    channels: "5",
-    status: "Active",
-    assign_to: "Support Team, Jane Smith",
-    inbound_id: 102
-  },
-  {
-    id: 3,
-    date_time: "2024-01-13 09:15:00",
-    trunk_id: "TRK003",
-    name: "Marketing",
-    caller_id: "+1234567892",
-    channels: "3",
-    status: "Inactive",
-    assign_to: "Marketing Team",
-    inbound_id: 103
-  }
-];
+import { useState, useEffect } from 'react'
+import { useNavigate, useParams } from 'react-router'
+import { useCallerIds } from '../../hooks/useCallerIds'
+import { supabase } from '../../lib/supabase'
+import PageMeta from '../../components/common/PageMeta'
 
 export default function EditCallerID() {
-  const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate()
+  const { id } = useParams<{ id: string }>()
+  const { updateCallerId } = useCallerIds()
   const [formData, setFormData] = useState({
-    trunk_id: '',
     name: '',
     caller_id: '',
-    channels: '',
-    status: 'Active',
-    assign_to: '',
-    inbound_id: ''
-  });
+    channels: 1,
+    status: 'Active'
+  })
+  const [loading, setLoading] = useState(false)
+  const [dataLoading, setDataLoading] = useState(true)
 
   useEffect(() => {
-    if (id) {
-      const callerID = dummyCallerIDs.find(c => c.id === parseInt(id));
-      if (callerID) {
-        setFormData({
-          trunk_id: callerID.trunk_id,
-          name: callerID.name,
-          caller_id: callerID.caller_id,
-          channels: callerID.channels,
-          status: callerID.status,
-          assign_to: callerID.assign_to,
-          inbound_id: callerID.inbound_id.toString()
-        });
+    const fetchCallerID = async () => {
+      if (!id) return
+      
+      try {
+        const { data, error } = await supabase
+          .from('caller_ids')
+          .select('*')
+          .eq('id', id)
+          .single()
+
+        if (error) throw error
+        
+        if (data) {
+          setFormData({
+            name: data.name,
+            caller_id: data.caller_id,
+            channels: data.channels || 1,
+            status: data.status
+          })
+        }
+      } catch (error) {
+        console.error('Error fetching caller ID:', error)
+        alert('Failed to load caller ID data')
+        navigate('/voice/caller-ids')
+      } finally {
+        setDataLoading(false)
       }
     }
-  }, [id]);
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    console.log('Form updated:', formData);
-  };
+    fetchCallerID()
+  }, [id, navigate])
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value
-    });
-  };
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!id) return
+    
+    setLoading(true)
+    
+    try {
+      const result = await updateCallerId(id, formData)
+      if (result.success) {
+        navigate('/voice/caller-ids')
+      } else {
+        alert('Failed to update caller ID')
+      }
+    } catch (error) {
+      console.error('Error:', error)
+      alert('An error occurred')
+    } finally {
+      setLoading(false)
+    }
+  }
 
   return (
     <>
-      <PageMeta title="Edit Caller ID | Voice" description="Edit caller ID configuration" />
+      <PageMeta title="Edit Caller ID | Voice" description="Edit caller ID" />
       
       <div className="space-y-6">
-        <div className="flex justify-between items-center">
-          <h1 className="text-2xl font-bold text-gray-800 dark:text-white/90">Edit Caller ID</h1>
-          <Link
-            to="/voice/caller-ids"
-            className="text-gray-600 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-200"
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Edit Caller ID</h1>
+            <p className="text-gray-600 dark:text-gray-400">Update caller ID information</p>
+          </div>
+          <button
+            onClick={() => navigate('/voice/caller-ids')}
+            className="px-4 py-2 text-gray-700 bg-gray-200 rounded-lg hover:bg-gray-300 dark:bg-gray-600 dark:text-gray-300 dark:hover:bg-gray-500"
           >
-            ← Back to List
-          </Link>
+            Back to List
+          </button>
         </div>
-        
-        <div className="rounded-2xl border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-white/[0.03]">
-          <form onSubmit={handleSubmit} className="space-y-6">
+
+        <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 p-6">
+          {dataLoading ? (
+            <div className="flex justify-center py-8">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+            </div>
+          ) : (
+            <form onSubmit={handleSubmit} className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  Trunk ID *
-                </label>
-                <input
-                  type="text"
-                  name="trunk_id"
-                  value={formData.trunk_id}
-                  onChange={handleChange}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-800 dark:border-gray-600 dark:text-white"
-                  required
-                />
-              </div>
-              
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                   Name *
                 </label>
                 <input
                   type="text"
-                  name="name"
                   value={formData.name}
-                  onChange={handleChange}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-800 dark:border-gray-600 dark:text-white"
+                  onChange={(e) => setFormData({...formData, name: e.target.value})}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
                   required
                 />
               </div>
-              
+
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                   Caller ID *
                 </label>
                 <input
                   type="tel"
-                  name="caller_id"
                   value={formData.caller_id}
-                  onChange={handleChange}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-800 dark:border-gray-600 dark:text-white"
+                  onChange={(e) => setFormData({...formData, caller_id: e.target.value})}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                  placeholder="+1234567890"
                   required
                 />
               </div>
-              
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  Channels
+                  Channels *
                 </label>
                 <input
                   type="number"
-                  name="channels"
+                  min="1"
                   value={formData.channels}
-                  onChange={handleChange}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-800 dark:border-gray-600 dark:text-white"
+                  onChange={(e) => setFormData({...formData, channels: parseInt(e.target.value) || 1})}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                  required
                 />
               </div>
-              
+
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                   Status
                 </label>
                 <select
-                  name="status"
                   value={formData.status}
-                  onChange={handleChange}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-800 dark:border-gray-600 dark:text-white"
+                  onChange={(e) => setFormData({...formData, status: e.target.value})}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
                 >
                   <option value="Active">Active</option>
                   <option value="Inactive">Inactive</option>
                 </select>
               </div>
-              
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  Assign To
-                </label>
-                <input
-                  type="text"
-                  name="assign_to"
-                  value={formData.assign_to}
-                  onChange={handleChange}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-800 dark:border-gray-600 dark:text-white"
-                />
-              </div>
-              
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  Inbound ID
-                </label>
-                <input
-                  type="number"
-                  name="inbound_id"
-                  value={formData.inbound_id}
-                  onChange={handleChange}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-800 dark:border-gray-600 dark:text-white"
-                />
-              </div>
             </div>
-            
-            <div className="flex justify-end space-x-4">
-              <Link
-                to="/voice/caller-ids"
-                className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-800"
+
+
+
+            <div className="flex justify-end space-x-3">
+              <button
+                type="button"
+                onClick={() => navigate('/voice/caller-ids')}
+                className="px-4 py-2 text-gray-700 bg-gray-200 rounded-lg hover:bg-gray-300 dark:bg-gray-600 dark:text-gray-300 dark:hover:bg-gray-500"
               >
                 Cancel
-              </Link>
+              </button>
               <button
                 type="submit"
-                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                disabled={loading}
+                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50"
               >
-                Update Caller ID
+                {loading ? 'Updating...' : 'Update Caller ID'}
               </button>
             </div>
           </form>
+          )}
         </div>
       </div>
     </>
-  );
+  )
 }
