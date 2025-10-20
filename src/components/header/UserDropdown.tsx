@@ -27,7 +27,9 @@ export default function UserDropdown() {
         className="flex items-center text-gray-700 dropdown-toggle dark:text-gray-400"
       >
         <span className="mr-3 overflow-hidden rounded-full h-11 w-11 bg-blue-600 flex items-center justify-center">
-          {profile?.full_name ? (
+          {profile?.profile_picture ? (
+            <img src={`/uploads/images/${profile.profile_picture}`} alt="Profile" className="w-full h-full object-cover" />
+          ) : profile?.full_name ? (
             <span className="text-white font-medium text-lg">
               {profile.full_name.charAt(0).toUpperCase()}
             </span>

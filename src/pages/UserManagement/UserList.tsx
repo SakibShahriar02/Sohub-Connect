@@ -2,76 +2,36 @@ import { useState } from "react";
 import { Link } from "react-router";
 import PageMeta from "../../components/common/PageMeta";
 import { showDeleteConfirmation } from "../../utils/deleteConfirmation";
-
-interface Staff {
-  id: number;
-  user_id: string;
-  name: string;
-  email: string;
-  mobileno: string;
-  status: string;
-  designation: string;
-  department: string;
-  role: string;
-  joining_date: string;
-}
-
-const dummyStaff: Staff[] = [
-  {
-    id: 1,
-    user_id: "USR001",
-    name: "John Doe",
-    email: "john.doe@sohub.com",
-    mobileno: "+1234567890",
-    status: "Active",
-    designation: "Manager",
-    department: "Sales",
-    role: "PBX Manager",
-    joining_date: "2023-01-15"
-  },
-  {
-    id: 2,
-    user_id: "USR002",
-    name: "Jane Smith",
-    email: "jane.smith@sohub.com",
-    mobileno: "+1234567891",
-    status: "Active",
-    designation: "Developer",
-    department: "IT",
-    role: "Support Agent",
-    joining_date: "2023-02-20"
-  },
-  {
-    id: 3,
-    user_id: "USR003",
-    name: "Mike Johnson",
-    email: "mike.johnson@sohub.com",
-    mobileno: "+1234567892",
-    status: "Inactive",
-    designation: "Analyst",
-    department: "Finance",
-    role: "Viewer",
-    joining_date: "2023-03-10"
-  }
-];
+import { useUserManagement } from "../../hooks/useUserManagement";
+import { useRoles } from "../../hooks/useRoles";
+import PermissionGuard from "../../components/PermissionGuard";
 
 export default function UserList() {
-  const [staff, setStaff] = useState<Staff[]>(dummyStaff);
+  const { users, loading, deleteUser } = useUserManagement();
   const [roleFilter, setRoleFilter] = useState<string>('');
 
-  const roles = ['Super Admin', 'PBX Manager', 'Support Agent', 'Viewer'];
+  const { roles: allRoles } = useRoles();
+  const roleNames = allRoles.map(r => r.name);
   
-  const filteredStaff = roleFilter 
-    ? staff.filter(member => member.role === roleFilter)
-    : staff;
+  const filteredUsers = roleFilter 
+    ? users.filter(user => user.role === roleFilter)
+    : users;
 
-  const handleDelete = (member: Staff) => {
+  const handleDelete = (user: any) => {
     showDeleteConfirmation({
-      text: `Delete ${member.name}?`,
-      onConfirm: () => setStaff(staff.filter(s => s.id !== member.id)),
-      successText: 'Staff member has been deleted successfully.'
+      text: `Delete ${user.name}?`,
+      onConfirm: () => deleteUser(user.id),
+      successText: 'User has been deleted successfully.'
     });
   };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+      </div>
+    );
+  }
 
   return (
     <>
@@ -80,12 +40,14 @@ export default function UserList() {
       <div className="space-y-6">
         <div className="flex justify-between items-center">
           <h1 className="text-2xl font-bold text-gray-800 dark:text-white/90">User List</h1>
-          <Link
-            to="/user-management/add-user"
-            className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors"
-          >
-            Add User
-          </Link>
+          <PermissionGuard requireSuperAdmin>
+            <Link
+              to="/user-management/add-user"
+              className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors"
+            >
+              Add User
+            </Link>
+          </PermissionGuard>
         </div>
         
         <div className="border-b border-gray-200 dark:border-gray-700">
@@ -98,10 +60,10 @@ export default function UserList() {
                   : 'border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300'
               }`}
             >
-              All ({staff.length})
+              All ({users.length})
             </button>
-            {roles.map((role) => {
-              const count = staff.filter(s => s.role === role).length;
+            {roleNames.map((role) => {
+              const count = users.filter(u => u.role === role).length;
               return (
                 <button
                   key={role}
@@ -128,51 +90,53 @@ export default function UserList() {
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Name</th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Email</th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Mobile</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Department</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Role</th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Status</th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
-                {filteredStaff.map((member) => (
-                  <tr key={member.id} className="hover:bg-gray-50 dark:hover:bg-gray-800/30">
+                {filteredUsers.map((user) => (
+                  <tr key={user.id} className="hover:bg-gray-50 dark:hover:bg-gray-800/30">
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white">
-                      {member.user_id}
+                      {user.user_id}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
-                      {member.name}
+                      {user.name || user.full_name}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
-                      {member.email}
+                      {user.email}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
-                      {member.mobileno}
+                      {user.phone || user.mobileno}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
-                      {member.department}
+                      {user.role}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                        member.status === 'Active' 
+                        user.status === 'Active' 
                           ? 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400'
                           : 'bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-400'
                       }`}>
-                        {member.status}
+                        {user.status}
                       </span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-2">
-                      <Link
-                        to={`/user-management/edit-user/${member.id}`}
-                        className="text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300"
-                      >
-                        Edit
-                      </Link>
-                      <button 
-                        onClick={() => handleDelete(member)}
-                        className="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300"
-                      >
-                        Delete
-                      </button>
+                      <PermissionGuard requireSuperAdmin>
+                        <Link
+                          to={`/user-management/edit-user/${user.id}`}
+                          className="text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300"
+                        >
+                          Edit
+                        </Link>
+                        <button 
+                          onClick={() => handleDelete(user)}
+                          className="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300"
+                        >
+                          Delete
+                        </button>
+                      </PermissionGuard>
                     </td>
                   </tr>
                 ))}

@@ -1,18 +1,38 @@
 import { useState } from "react";
-import { Link } from "react-router";
+import { Link, useNavigate } from "react-router";
 import PageMeta from "../../components/common/PageMeta";
+import { useSoundFiles } from "../../hooks/useSoundFilesLocal";
+import Swal from 'sweetalert2';
 
 export default function AddSoundFile() {
+  const navigate = useNavigate();
+  const { uploadSoundFile } = useSoundFiles();
+  const [loading, setLoading] = useState(false);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [formData, setFormData] = useState({
     sound_name: '',
-    file_name: '',
-    status: 'Active',
+    status: 'Active' as 'Active' | 'Inactive',
     assign_to: ''
   });
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log('Form submitted:', formData);
+    
+    if (!selectedFile) {
+      Swal.fire('Error', 'Please select an audio file', 'error');
+      return;
+    }
+
+    setLoading(true);
+    try {
+      await uploadSoundFile(selectedFile, formData);
+      Swal.fire('Success', 'Sound file uploaded successfully!', 'success');
+      navigate('/voice/sound-files');
+    } catch (error) {
+      Swal.fire('Error', 'Failed to upload sound file', 'error');
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
@@ -20,6 +40,13 @@ export default function AddSoundFile() {
       ...formData,
       [e.target.name]: e.target.value
     });
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setSelectedFile(file);
+    }
   };
 
   return (
@@ -61,9 +88,15 @@ export default function AddSoundFile() {
                 <input
                   type="file"
                   accept="audio/*"
+                  onChange={handleFileChange}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-800 dark:border-gray-600 dark:text-white"
                   required
                 />
+                {selectedFile && (
+                  <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">
+                    Selected: {selectedFile.name}
+                  </p>
+                )}
               </div>
               
               <div>
@@ -104,9 +137,10 @@ export default function AddSoundFile() {
               </Link>
               <button
                 type="submit"
-                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                disabled={loading}
+                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                Add Sound File
+                {loading ? 'Uploading...' : 'Add Sound File'}
               </button>
             </div>
           </form>

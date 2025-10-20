@@ -1,0 +1,9 @@
+@echo off
+echo Starting SOHUB Connect Development Environment...
+echo.
+echo Starting Upload Server...
+start /B "Upload Server" cmd /c "cd server && node upload-sound.js"
+timeout /t 2 /nobreak > nul
+echo.
+echo Starting Vite Development Server...
+npm run dev

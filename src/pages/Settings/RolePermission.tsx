@@ -1,6 +1,9 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import PageMeta from '../../components/common/PageMeta';
 import { showDeleteConfirmation } from '../../utils/deleteConfirmation';
+import { useRoles } from '../../hooks/useRoles';
+import { supabase } from '../../lib/supabase';
+import Swal from 'sweetalert2';
 
 interface Permission {
   id: string;
@@ -21,98 +24,116 @@ interface Role {
 
 export default function RolePermission() {
   const [activeTab, setActiveTab] = useState<'roles' | 'permissions'>('roles');
-  
-  const [roles, setRoles] = useState<Role[]>([
-    {
-      id: 1,
-      name: 'Super Admin',
-      description: 'Full system access with all permissions',
-      permissions: ['dashboard.view', 'users.manage', 'pbx.manage', 'settings.manage', 'reports.view'],
-      user_count: 2,
-      created_at: '2024-01-01 00:00:00',
-      status: 'Active'
-    },
-    {
-      id: 2,
-      name: 'PBX Manager',
-      description: 'Manage PBX settings and configurations',
-      permissions: ['dashboard.view', 'pbx.manage', 'extensions.manage', 'reports.view'],
-      user_count: 5,
-      created_at: '2024-01-02 00:00:00',
-      status: 'Active'
-    },
-    {
-      id: 3,
-      name: 'Support Agent',
-      description: 'Handle customer support and tickets',
-      permissions: ['dashboard.view', 'tickets.manage', 'users.view', 'reports.view'],
-      user_count: 12,
-      created_at: '2024-01-03 00:00:00',
-      status: 'Active'
-    },
-    {
-      id: 4,
-      name: 'Viewer',
-      description: 'Read-only access to dashboard and reports',
-      permissions: ['dashboard.view', 'reports.view'],
-      user_count: 8,
-      created_at: '2024-01-04 00:00:00',
-      status: 'Active'
-    }
-  ]);
+  const { roles, permissions, loading } = useRoles();
+  const [rolesWithPermissions, setRolesWithPermissions] = useState<any[]>([]);
+  const [loadingRoles, setLoadingRoles] = useState(true);
 
-  const [permissions] = useState<Permission[]>([
-    // Dashboard
-    { id: 'dashboard.view', name: 'View Dashboard', description: 'Access to main dashboard', category: 'Dashboard' },
-    
-    // User Management
-    { id: 'users.view', name: 'View Users', description: 'View user list and details', category: 'User Management' },
-    { id: 'users.create', name: 'Create Users', description: 'Add new users to system', category: 'User Management' },
-    { id: 'users.edit', name: 'Edit Users', description: 'Modify user information', category: 'User Management' },
-    { id: 'users.delete', name: 'Delete Users', description: 'Remove users from system', category: 'User Management' },
-    { id: 'users.manage', name: 'Manage Users', description: 'Full user management access', category: 'User Management' },
-    
-    // PBX Management
-    { id: 'pbx.view', name: 'View PBX', description: 'View PBX configurations', category: 'PBX Management' },
-    { id: 'pbx.manage', name: 'Manage PBX', description: 'Full PBX management access', category: 'PBX Management' },
-    { id: 'extensions.manage', name: 'Manage Extensions', description: 'Create and modify extensions', category: 'PBX Management' },
-    { id: 'routes.manage', name: 'Manage Routes', description: 'Configure inbound/outbound routes', category: 'PBX Management' },
-    { id: 'trunks.manage', name: 'Manage Trunks', description: 'Configure trunk connections', category: 'PBX Management' },
-    
-    // Voice Services
-    { id: 'voice.view', name: 'View Voice Services', description: 'Access voice service settings', category: 'Voice Services' },
-    { id: 'voice.manage', name: 'Manage Voice Services', description: 'Configure voice services', category: 'Voice Services' },
-    { id: 'callerids.manage', name: 'Manage Caller IDs', description: 'Configure caller ID settings', category: 'Voice Services' },
-    
-    // Reports
-    { id: 'reports.view', name: 'View Reports', description: 'Access to system reports', category: 'Reports' },
-    { id: 'reports.export', name: 'Export Reports', description: 'Download and export reports', category: 'Reports' },
-    
-    // Tickets
-    { id: 'tickets.view', name: 'View Tickets', description: 'View support tickets', category: 'Support' },
-    { id: 'tickets.create', name: 'Create Tickets', description: 'Create new support tickets', category: 'Support' },
-    { id: 'tickets.manage', name: 'Manage Tickets', description: 'Full ticket management access', category: 'Support' },
-    
-    // Settings
-    { id: 'settings.view', name: 'View Settings', description: 'Access system settings', category: 'Settings' },
-    { id: 'settings.manage', name: 'Manage Settings', description: 'Modify system configurations', category: 'Settings' },
-    { id: 'roles.manage', name: 'Manage Roles', description: 'Create and modify user roles', category: 'Settings' }
-  ]);
+  useEffect(() => {
+    const fetchRolesWithPermissions = async () => {
+      try {
+        // Fetch roles with permissions
+        const { data: rolesData, error: rolesError } = await supabase
+          .from('roles')
+          .select(`
+            *,
+            role_permissions (
+              permissions (
+                id,
+                name,
+                description,
+                module
+              )
+            )
+          `);
 
-  const [selectedRole, setSelectedRole] = useState<Role | null>(null);
+        if (rolesError) throw rolesError;
+        
+        // Fetch user counts for each role
+        const rolesWithCounts = await Promise.all(
+          (rolesData || []).map(async (role) => {
+            const { count, error: countError } = await supabase
+              .from('profiles')
+              .select('*', { count: 'exact', head: true })
+              .eq('role_id', role.id);
+            
+            if (countError) console.error('Error counting users for role:', role.name, countError);
+            
+            return {
+              ...role,
+              permissions: role.role_permissions?.map((rp: any) => rp.permissions.id) || [],
+              user_count: count || 0
+            };
+          })
+        );
+        
+        setRolesWithPermissions(rolesWithCounts);
+      } catch (error) {
+        console.error('Error fetching roles:', error);
+      } finally {
+        setLoadingRoles(false);
+      }
+    };
+
+    fetchRolesWithPermissions();
+  }, []);
+
+  const [selectedRole, setSelectedRole] = useState<any>(null);
   const [isEditingRole, setIsEditingRole] = useState(false);
   const [isAddingRole, setIsAddingRole] = useState(false);
-  const [newRole, setNewRole] = useState<Omit<Role, 'id' | 'user_count' | 'created_at'>>({
+  const [newRole, setNewRole] = useState({
     name: '',
     description: '',
-    permissions: [],
-    status: 'Active'
+    permissions: [] as string[]
   });
 
-  const handleDeleteRole = (role: Role) => {
+  const handleDeleteRole = (role: any) => {
     showDeleteConfirmation({
-      text: `Delete role "${role.name}"? ${role.user_count} users are assigned to this role.`,
-      onConfirm: () => setRoles(roles.filter(r => r.id !== role.id)),
+      text: `Delete role "${role.name}"? This action cannot be undone.`,
+      onConfirm: async () => {
+        try {
+          const { error } = await supabase
+            .from('roles')
+            .delete()
+            .eq('id', role.id);
+          
+          if (error) throw error;
+          
+          // Refetch roles to update the list
+          const { data: updatedRoles } = await supabase
+            .from('roles')
+            .select(`
+              *,
+              role_permissions (
+                permissions (
+                  id,
+                  name,
+                  description,
+                  module
+                )
+              )
+            `);
+          
+          const rolesWithCounts = await Promise.all(
+            (updatedRoles || []).map(async (role) => {
+              const { count } = await supabase
+                .from('profiles')
+                .select('*', { count: 'exact', head: true })
+                .eq('role_id', role.id);
+              
+              return {
+                ...role,
+                permissions: role.role_permissions?.map((rp: any) => rp.permissions.id) || [],
+                user_count: count || 0
+              };
+            })
+          );
+          
+          setRolesWithPermissions(rolesWithCounts);
+          Swal.fire('Success', 'Role deleted successfully!', 'success');
+        } catch (error) {
+          Swal.fire('Error', 'Failed to delete role', 'error');
+        }
+      },
       successText: 'Role has been deleted successfully.'
     });
   };
@@ -122,24 +143,141 @@ export default function RolePermission() {
     setIsEditingRole(true);
   };
 
-  const handleSaveRole = () => {
-    if (selectedRole) {
-      setRoles(roles.map(r => r.id === selectedRole.id ? selectedRole : r));
+  const handleSaveRole = async () => {
+    if (!selectedRole) return;
+    
+    try {
+      // Update role basic info
+      const { error: roleError } = await supabase
+        .from('roles')
+        .update({
+          name: selectedRole.name,
+          description: selectedRole.description
+        })
+        .eq('id', selectedRole.id);
+      
+      if (roleError) throw roleError;
+      
+      // Update permissions
+      await supabase
+        .from('role_permissions')
+        .delete()
+        .eq('role_id', selectedRole.id);
+      
+      const permissionIds = permissions
+        .filter(p => selectedRole.permissions.includes(p.id))
+        .map(p => ({ role_id: selectedRole.id, permission_id: p.id }));
+      
+      if (permissionIds.length > 0) {
+        const { error: permError } = await supabase
+          .from('role_permissions')
+          .insert(permissionIds);
+        
+        if (permError) throw permError;
+      }
+      
+      // Refetch roles to update user counts
+      const { data: updatedRoles } = await supabase
+        .from('roles')
+        .select(`
+          *,
+          role_permissions (
+            permissions (
+              id,
+              name,
+              description,
+              module
+            )
+          )
+        `);
+      
+      const rolesWithCounts = await Promise.all(
+        (updatedRoles || []).map(async (role) => {
+          const { count } = await supabase
+            .from('profiles')
+            .select('*', { count: 'exact', head: true })
+            .eq('role_id', role.id);
+          
+          return {
+            ...role,
+            permissions: role.role_permissions?.map((rp: any) => rp.permissions.id) || [],
+            user_count: count || 0
+          };
+        })
+      );
+      
+      setRolesWithPermissions(rolesWithCounts);
       setIsEditingRole(false);
       setSelectedRole(null);
+      Swal.fire('Success', 'Role updated successfully!', 'success');
+    } catch (error) {
+      Swal.fire('Error', 'Failed to update role', 'error');
     }
   };
 
-  const handleAddRole = () => {
-    const roleToAdd: Role = {
-      ...newRole,
-      id: Math.max(...roles.map(r => r.id)) + 1,
-      user_count: 0,
-      created_at: new Date().toISOString()
-    };
-    setRoles([...roles, roleToAdd]);
-    setIsAddingRole(false);
-    setNewRole({ name: '', description: '', permissions: [], status: 'Active' });
+  const handleAddRole = async () => {
+    try {
+      const { data: roleData, error: roleError } = await supabase
+        .from('roles')
+        .insert([{
+          name: newRole.name,
+          description: newRole.description
+        }])
+        .select()
+        .single();
+      
+      if (roleError) throw roleError;
+      
+      // Add permissions
+      const permissionIds = permissions
+        .filter(p => newRole.permissions.includes(p.id))
+        .map(p => ({ role_id: roleData.id, permission_id: p.id }));
+      
+      if (permissionIds.length > 0) {
+        const { error: permError } = await supabase
+          .from('role_permissions')
+          .insert(permissionIds);
+        
+        if (permError) throw permError;
+      }
+      
+      // Refetch roles to update the list
+      const { data: updatedRoles } = await supabase
+        .from('roles')
+        .select(`
+          *,
+          role_permissions (
+            permissions (
+              id,
+              name,
+              description,
+              module
+            )
+          )
+        `);
+      
+      const rolesWithCounts = await Promise.all(
+        (updatedRoles || []).map(async (role) => {
+          const { count } = await supabase
+            .from('profiles')
+            .select('*', { count: 'exact', head: true })
+            .eq('role_id', role.id);
+          
+          return {
+            ...role,
+            permissions: role.role_permissions?.map((rp: any) => rp.permissions.id) || [],
+            user_count: count || 0
+          };
+        })
+      );
+      
+      setRolesWithPermissions(rolesWithCounts);
+      setIsAddingRole(false);
+      setNewRole({ name: '', description: '', permissions: [] });
+      Swal.fire('Success', 'Role created successfully!', 'success');
+    } catch (error) {
+      Swal.fire('Error', 'Failed to create role', 'error');
+    }
   };
 
   const toggleNewRolePermission = (permissionId: string) => {
@@ -169,12 +307,20 @@ export default function RolePermission() {
   };
 
   const groupedPermissions = permissions.reduce((acc, permission) => {
-    if (!acc[permission.category]) {
-      acc[permission.category] = [];
+    if (!acc[permission.module]) {
+      acc[permission.module] = [];
     }
-    acc[permission.category].push(permission);
+    acc[permission.module].push(permission);
     return acc;
-  }, {} as Record<string, Permission[]>);
+  }, {} as Record<string, any[]>);
+
+  if (loading || loadingRoles) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+      </div>
+    );
+  }
 
   return (
     <>
@@ -237,7 +383,7 @@ export default function RolePermission() {
         </div>
 
         {activeTab === 'roles' && (
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div className={`${isEditingRole || isAddingRole ? 'grid grid-cols-1 lg:grid-cols-2 gap-6' : ''}`}>
             {/* Roles List */}
             <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 overflow-hidden">
               <div className="p-6 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50">
@@ -248,9 +394,11 @@ export default function RolePermission() {
                   <h3 className="text-lg font-semibold text-gray-900 dark:text-white">System Roles</h3>
                 </div>
               </div>
-              <div className="divide-y divide-gray-200 dark:divide-gray-700">
-                {roles.map((role) => (
-                  <div key={role.id} className="p-6 hover:bg-gray-50 dark:hover:bg-gray-800">
+              <div className={`divide-y divide-gray-200 dark:divide-gray-700 ${isEditingRole || isAddingRole ? 'max-h-96 overflow-y-auto' : ''}`}>
+                {rolesWithPermissions.map((role) => (
+                  <div key={role.id} className={`p-6 hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer ${
+                    selectedRole?.id === role.id ? 'bg-blue-50 dark:bg-blue-900/20 border-l-4 border-blue-500' : ''
+                  }`} onClick={() => handleEditRole(role)}>
                     <div className="flex items-center justify-between">
                       <div className="flex-1">
                         <h4 className="text-sm font-medium text-gray-900 dark:text-white">{role.name}</h4>

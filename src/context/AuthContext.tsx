@@ -1,7 +1,19 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { supabase } from '../lib/supabase';
+
+interface Profile {
+  id: string;
+  user_id: string;
+  name: string;
+  email: string;
+  role: string;
+}
 
 interface AuthContextType {
   isAuthenticated: boolean;
+  profile: Profile | null;
+  loading: boolean;
+  isSuperAdmin: boolean;
   login: () => void;
   logout: () => void;
 }
@@ -17,58 +29,75 @@ export const useAuth = () => {
 };
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
-  const [isAuthenticated, setIsAuthenticated] = useState(() => {
-    try {
-      const authData = localStorage.getItem('authSession');
-      if (authData) {
-        const { isAuthenticated, expiresAt } = JSON.parse(authData);
-        return isAuthenticated && new Date().getTime() < expiresAt;
-      }
-      return false;
-    } catch {
-      return false;
-    }
-  });
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [profile, setProfile] = useState<Profile | null>(null);
+  const [loading, setLoading] = useState(true);
+  
+  const isSuperAdmin = profile?.role === 'Super Admin';
 
   useEffect(() => {
-    try {
-      const authData = localStorage.getItem('authSession');
-      if (authData) {
-        const { isAuthenticated: stored, expiresAt } = JSON.parse(authData);
-        if (stored && new Date().getTime() < expiresAt && !isAuthenticated) {
+    const getSession = async () => {
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        
+        if (session?.user) {
           setIsAuthenticated(true);
-        } else if (new Date().getTime() >= expiresAt) {
-          localStorage.removeItem('authSession');
-          setIsAuthenticated(false);
+          
+          // Fetch user profile
+          const { data: profileData } = await supabase
+            .from('profiles')
+            .select('*')
+            .eq('id', session.user.id)
+            .single();
+            
+          if (profileData) {
+            setProfile(profileData);
+          }
         }
+      } catch (error) {
+        console.error('Error getting session:', error);
+      } finally {
+        setLoading(false);
       }
-    } catch (error) {
-      console.warn('Failed to read auth session from localStorage:', error);
-    }
-  }, [isAuthenticated]);
+    };
+
+    getSession();
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+      if (session?.user) {
+        setIsAuthenticated(true);
+        
+        const { data: profileData } = await supabase
+          .from('profiles')
+          .select('*')
+          .eq('id', session.user.id)
+          .single();
+          
+        if (profileData) {
+          setProfile(profileData);
+        }
+      } else {
+        setIsAuthenticated(false);
+        setProfile(null);
+      }
+      setLoading(false);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
 
   const login = () => {
-    try {
-      const expiresAt = new Date().getTime() + (30 * 24 * 60 * 60 * 1000); // 30 days
-      const authData = { isAuthenticated: true, expiresAt };
-      setIsAuthenticated(true);
-      localStorage.setItem('authSession', JSON.stringify(authData));
-    } catch (error) {
-      console.warn('Failed to save auth session to localStorage:', error);
-    }
+    // Login handled by Supabase auth
   };
 
-  const logout = () => {
-    try {
-      setIsAuthenticated(false);
-      localStorage.removeItem('authSession');
-    } catch (error) {
-      console.warn('Failed to remove auth session from localStorage:', error);
-    }
+  const logout = async () => {
+    await supabase.auth.signOut();
+    setIsAuthenticated(false);
+    setProfile(null);
   };
 
   return (
-    <AuthContext.Provider value={{ isAuthenticated, login, logout }}>
+    <AuthContext.Provider value={{ isAuthenticated, profile, loading, isSuperAdmin, login, logout }}>
       {children}
     </AuthContext.Provider>
   );

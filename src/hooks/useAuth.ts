@@ -7,10 +7,12 @@ interface Profile {
   email: string
   full_name: string | null
   role: string
-  department: string | null
-  designation: string | null
   phone: string | null
   status: string
+  profile_picture: string | null
+  nid_front: string | null
+  nid_back: string | null
+  certificate: string | null
 }
 
 export const useAuth = () => {
@@ -48,7 +50,11 @@ export const useAuth = () => {
       console.log('Fetching profile for user:', userId)
       const { data, error } = await supabase
         .from('profiles')
-        .select('*')
+        .select(`
+          id, email, full_name, role, phone, status, 
+          profile_picture, nid_front, nid_back, certificate,
+          roles (name)
+        `)
         .eq('id', userId)
         .single()
 

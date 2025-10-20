@@ -1,0 +1,18 @@
+{
+  "name": "sohub-upload-server",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "File upload server for SOHUB Connect",
+  "main": "upload-sound.js",
+  "scripts": {
+    "start": "node upload-sound.js",
+    "dev": "nodemon upload-sound.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "multer": "^1.4.5-lts.1"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.1"
+  }
+}

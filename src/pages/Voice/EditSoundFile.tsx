@@ -1,59 +1,25 @@
 import { useState, useEffect } from "react";
-import { Link, useParams } from "react-router";
+import { Link, useParams, useNavigate } from "react-router";
 import PageMeta from "../../components/common/PageMeta";
-
-interface SoundFile {
-  id: number;
-  date_time: string;
-  update_datetime: string;
-  sound_name: string;
-  file_name: string;
-  status: string;
-  assign_to: string;
-}
-
-const dummySoundFiles: SoundFile[] = [
-  {
-    id: 1,
-    date_time: "2024-01-15 10:30:00",
-    update_datetime: "2024-01-15 10:30:00",
-    sound_name: "Welcome Message",
-    file_name: "welcome.wav",
-    status: "Active",
-    assign_to: "Main IVR"
-  },
-  {
-    id: 2,
-    date_time: "2024-01-14 14:20:00",
-    update_datetime: "2024-01-16 09:15:00",
-    sound_name: "Hold Music",
-    file_name: "hold_music.mp3",
-    status: "Active",
-    assign_to: "Queue System"
-  },
-  {
-    id: 3,
-    date_time: "2024-01-13 09:15:00",
-    update_datetime: "2024-01-13 09:15:00",
-    sound_name: "Goodbye Message",
-    file_name: "goodbye.wav",
-    status: "Inactive",
-    assign_to: "Call End"
-  }
-];
+import { useSoundFiles } from "../../hooks/useSoundFilesLocal";
+import Swal from 'sweetalert2';
 
 export default function EditSoundFile() {
   const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
+  const { soundFiles, updateSoundFile } = useSoundFiles();
+  const [loading, setLoading] = useState(false);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [formData, setFormData] = useState({
     sound_name: '',
     file_name: '',
-    status: 'Active',
+    status: 'Active' as 'Active' | 'Inactive',
     assign_to: ''
   });
 
   useEffect(() => {
-    if (id) {
-      const soundFile = dummySoundFiles.find(f => f.id === parseInt(id));
+    if (id && soundFiles.length > 0) {
+      const soundFile = soundFiles.find(sf => sf.id === parseInt(id));
       if (soundFile) {
         setFormData({
           sound_name: soundFile.sound_name,
@@ -63,11 +29,23 @@ export default function EditSoundFile() {
         });
       }
     }
-  }, [id]);
+  }, [id, soundFiles]);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log('Form updated:', formData);
+    
+    if (!id) return;
+
+    setLoading(true);
+    try {
+      await updateSoundFile(parseInt(id), formData, selectedFile || undefined);
+      Swal.fire('Success', 'Sound file updated successfully!', 'success');
+      navigate('/voice/sound-files');
+    } catch (error) {
+      Swal.fire('Error', 'Failed to update sound file', 'error');
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
@@ -75,6 +53,13 @@ export default function EditSoundFile() {
       ...formData,
       [e.target.name]: e.target.value
     });
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setSelectedFile(file);
+    }
   };
 
   return (
@@ -125,8 +110,14 @@ export default function EditSoundFile() {
                 <input
                   type="file"
                   accept="audio/*"
+                  onChange={handleFileChange}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-800 dark:border-gray-600 dark:text-white"
                 />
+                {selectedFile && (
+                  <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">
+                    New file: {selectedFile.name}
+                  </p>
+                )}
               </div>
               
               <div>
@@ -167,9 +158,10 @@ export default function EditSoundFile() {
               </Link>
               <button
                 type="submit"
-                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                disabled={loading}
+                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                Update Sound File
+                {loading ? 'Updating...' : 'Update Sound File'}
               </button>
             </div>
           </form>

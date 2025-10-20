@@ -1,85 +1,46 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { Link } from "react-router";
 import PageMeta from "../../components/common/PageMeta";
 import { showDeleteConfirmation } from "../../utils/deleteConfirmation";
-
-interface SoundFile {
-  id: number;
-  date_time: string;
-  update_datetime: string;
-  sound_name: string;
-  file_name: string;
-  status: string;
-  assign_to: string;
-}
-
-const dummySoundFiles: SoundFile[] = [
-  {
-    id: 1,
-    date_time: "2024-01-15 10:30:00",
-    update_datetime: "2024-01-15 10:30:00",
-    sound_name: "Welcome Message",
-    file_name: "welcome.wav",
-    status: "Active",
-    assign_to: "Main IVR"
-  },
-  {
-    id: 2,
-    date_time: "2024-01-14 14:20:00",
-    update_datetime: "2024-01-16 09:15:00",
-    sound_name: "Hold Music",
-    file_name: "hold_music.mp3",
-    status: "Active",
-    assign_to: "Queue System"
-  },
-  {
-    id: 3,
-    date_time: "2024-01-13 09:15:00",
-    update_datetime: "2024-01-13 09:15:00",
-    sound_name: "Goodbye Message",
-    file_name: "goodbye.wav",
-    status: "Inactive",
-    assign_to: "Call End"
-  },
-  {
-    id: 4,
-    date_time: "2024-01-12 16:45:00",
-    update_datetime: "2024-01-14 11:30:00",
-    sound_name: "Business Hours",
-    file_name: "business_hours.wav",
-    status: "Active",
-    assign_to: "Time Routing"
-  },
-  {
-    id: 5,
-    date_time: "2024-01-11 11:20:00",
-    update_datetime: "2024-01-11 11:20:00",
-    sound_name: "Emergency Alert",
-    file_name: "emergency.wav",
-    status: "Active",
-    assign_to: "Emergency System"
-  },
-  {
-    id: 6,
-    date_time: "2024-01-10 08:30:00",
-    update_datetime: "2024-01-12 14:20:00",
-    sound_name: "Menu Options",
-    file_name: "menu_options.wav",
-    status: "Active",
-    assign_to: "Main Menu"
-  }
-];
+import { useSoundFiles } from "../../hooks/useSoundFilesLocal";
 
 export default function SoundFiles() {
-  const [soundFiles, setSoundFiles] = useState<SoundFile[]>(dummySoundFiles);
+  const { soundFiles, loading, deleteSoundFile, getFileUrl } = useSoundFiles();
+  const [playingId, setPlayingId] = useState<number | null>(null);
+  const audioRef = useRef<HTMLAudioElement>(null);
 
-  const handleDelete = (file: SoundFile) => {
+  const handleDelete = (file: any) => {
     showDeleteConfirmation({
       text: `Delete ${file.sound_name}?`,
-      onConfirm: () => setSoundFiles(soundFiles.filter(f => f.id !== file.id)),
+      onConfirm: () => deleteSoundFile(file.id),
       successText: 'Sound file has been deleted successfully.'
     });
   };
+
+  const handlePlay = (file: any) => {
+    if (playingId === file.id) {
+      audioRef.current?.pause();
+      setPlayingId(null);
+    } else {
+      if (audioRef.current) {
+        audioRef.current.src = getFileUrl(file.file_name);
+        audioRef.current.play();
+        setPlayingId(file.id);
+      }
+    }
+  };
+
+  const handleAudioEnd = () => {
+    setPlayingId(null);
+  };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+      </div>
+    );
+  }
 
   return (
     <>
@@ -104,9 +65,9 @@ export default function SoundFiles() {
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">ID</th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Sound Name</th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">File Name</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Play</th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Status</th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Assigned To</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Created</th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Updated</th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Actions</th>
                 </tr>
@@ -124,6 +85,18 @@ export default function SoundFiles() {
                       {file.file_name}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
+                      <button
+                        onClick={() => handlePlay(file)}
+                        className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium transition-colors ${
+                          playingId === file.id
+                            ? 'bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-400'
+                            : 'bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-400 hover:bg-blue-200 dark:hover:bg-blue-900/30'
+                        }`}
+                      >
+                        {playingId === file.id ? '⏸️ Pause' : '▶️ Play'}
+                      </button>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
                       <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
                         file.status === 'Active' 
                           ? 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400'
@@ -136,10 +109,7 @@ export default function SoundFiles() {
                       {file.assign_to}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
-                      {new Date(file.date_time).toLocaleDateString()}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
-                      {new Date(file.update_datetime).toLocaleDateString()}
+                      {new Date(file.updated_at).toLocaleDateString()}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-2">
                       <Link
@@ -161,6 +131,13 @@ export default function SoundFiles() {
             </table>
           </div>
         </div>
+        
+        <audio
+          ref={audioRef}
+          onEnded={handleAudioEnd}
+          onPause={() => setPlayingId(null)}
+          className="hidden"
+        />
       </div>
     </>
   );
