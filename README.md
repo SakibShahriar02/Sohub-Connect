@@ -1,6 +1,6 @@
 # SOHUB Connect - Cloud-Based IP PBX & Unified Communications Platform
 
-SOHUB Connect is one of the leading cloud-based IP PBX and Unified Communications (UCaaS) platforms in Bangladesh, developed specifically to assist small and medium-sized enterprises (SMEs). As a trusted local provider, we support businesses and entrepreneurs in modernizing and streamlining their communication infrastructure.
+SOHUB Connect is one of the leading cloud-based IP PBX and Unified Communications (UCaaS)  platforms in Bangladesh, developed specifically to assist small and medium-sized enterprises (SMEs). As a trusted local provider, we support businesses and entrepreneurs in modernizing and streamlining their communication infrastructure.
 
 Expanding your team, opening new branches, or aiming to boost customer connectivity? SOHUB Connect adapts to your specific needs—offering reliable, secure, and cost-effective communication solutions. From startups to enterprise-level operations, our platform scales with your business and delivers all essential features.
 
