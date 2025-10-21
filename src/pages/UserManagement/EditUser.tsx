@@ -89,6 +89,8 @@ export default function EditUser() {
     const file = e.target.files?.[0];
     if (!file) return;
 
+    const oldFileName = formData[fieldName as keyof typeof formData];
+
     const formDataUpload = new FormData();
     formDataUpload.append('document', file);
 
@@ -100,6 +102,19 @@ export default function EditUser() {
 
       const result = await response.json();
       if (result.success) {
+        // Delete old file if exists
+        if (oldFileName) {
+          const deleteUrl = result.path.includes('/images/') 
+            ? `/uploads/images/${oldFileName}`
+            : `/uploads/documents/${oldFileName}`;
+          
+          try {
+            await fetch(deleteUrl, { method: 'DELETE' });
+          } catch (error) {
+            console.warn('Failed to delete old file:', error);
+          }
+        }
+
         setFormData(prev => ({
           ...prev,
           [fieldName]: result.filename

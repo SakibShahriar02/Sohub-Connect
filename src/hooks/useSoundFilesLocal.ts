@@ -33,6 +33,7 @@ export const useSoundFiles = () => {
 
   const uploadSoundFile = async (file: File, soundData: Omit<SoundFile, 'id' | 'file_name' | 'created_at' | 'updated_at'>) => {
     try {
+      console.log('Starting file upload...');
       const formData = new FormData();
       formData.append('file', file);
       
@@ -44,7 +45,9 @@ export const useSoundFiles = () => {
       if (!response.ok) throw new Error('Upload failed');
       
       const { fileName } = await response.json();
+      console.log('File uploaded successfully:', fileName);
 
+      console.log('Saving to Supabase...', { ...soundData, file_name: fileName });
       const { data, error } = await supabase
         .from('sound_files_local')
         .insert([{
@@ -54,8 +57,12 @@ export const useSoundFiles = () => {
         .select()
         .single();
 
-      if (error) throw error;
+      if (error) {
+        console.error('Supabase error:', error);
+        throw error;
+      }
       
+      console.log('Saved to Supabase successfully:', data);
       setSoundFiles(prev => [data, ...prev]);
       return data;
     } catch (error) {

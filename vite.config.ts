@@ -1,6 +1,7 @@
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 import svgr from "vite-plugin-svgr";
+import uploadPlugin from "./vite-upload-plugin.js";
 
 // https://vite.dev/config/
 export default defineConfig({
@@ -14,17 +15,6 @@ export default defineConfig({
         namedExport: "ReactComponent",
       },
     }),
+    uploadPlugin(),
   ],
-  server: {
-    proxy: {
-      '/api': {
-        target: 'http://localhost:3001',
-        changeOrigin: true
-      },
-      '/upload-document': {
-        target: 'http://localhost:3002',
-        changeOrigin: true
-      }
-    }
-  }
 });

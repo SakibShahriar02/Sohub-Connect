@@ -4,11 +4,8 @@
   "version": "beta",
   "type": "module",
   "scripts": {
-    "dev": "concurrently \"npm run server\" \"npm run documents-server\" \"vite --host\"",
-    "server": "cd server && node upload-sound.js",
-    "documents-server": "cd server && node upload-documents.js",
-    "build": "tsc -b && vite build && npm run build:server",
-    "build:server": "cp -r server dist/ && cp -r public/uploads dist/ 2>nul || xcopy server dist\\server\\ /E /I /Y && xcopy public\\uploads dist\\uploads\\ /E /I /Y 2>nul || echo \"Build complete\"",
+    "dev": "vite --host",
+    "build": "tsc -b && vite build",
     "lint": "eslint .",
     "preview": "vite preview"
   },

@@ -137,6 +137,31 @@ export const useUserManagement = () => {
 
   const deleteUser = async (id: string) => {
     try {
+      const user = users.find(u => u.id === id);
+      
+      // Delete user files
+      if (user) {
+        const filesToDelete = [
+          user.profile_picture,
+          user.nid_front,
+          user.nid_back,
+          user.certificate
+        ].filter(Boolean);
+
+        for (const fileName of filesToDelete) {
+          try {
+            // Try both image and document paths
+            await fetch(`/uploads/images/${fileName}`, { method: 'DELETE' });
+          } catch {
+            try {
+              await fetch(`/uploads/documents/${fileName}`, { method: 'DELETE' });
+            } catch (error) {
+              console.warn('Failed to delete file:', fileName, error);
+            }
+          }
+        }
+      }
+
       // Delete from auth.users
       const { error: authError } = await supabaseAdmin.auth.admin.deleteUser(id);
       if (authError) throw authError;
