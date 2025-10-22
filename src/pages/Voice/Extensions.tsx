@@ -213,7 +213,7 @@ export default function Extensions() {
           display_name: formData.display_name,
           tech: 'pjsip',
           callerid: null,
-          extension_pass: password,
+          password: password,
           status: formData.status,
           assign_to: profile?.id,
           date_time: new Date().toISOString(),
@@ -248,7 +248,7 @@ export default function Extensions() {
     setEditModal({show: true, extension});
     setEditFormData({
       display_name: extension.display_name,
-      extension_pass: extension.extension_pass || '',
+      extension_pass: extension.password || '',
       status: extension.status
     });
   };
@@ -321,7 +321,7 @@ export default function Extensions() {
       
       // Only update password if provided
       if (editFormData.extension_pass.trim()) {
-        updateData.extension_pass = editFormData.extension_pass;
+        updateData.password = editFormData.extension_pass;
       }
       
       const { error } = await supabase

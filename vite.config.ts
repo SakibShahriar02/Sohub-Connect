@@ -20,7 +20,7 @@ export default defineConfig({
   server: {
     proxy: {
       '/freepbx-api': {
-        target: 'https://voice.tolpar.com.bd',
+        target: process.env.VITE_FREEPBX_URL || 'https://voice.tolpar.com.bd',
         changeOrigin: true,
         rewrite: (path) => path.replace(/^\/freepbx-api/, ''),
         secure: true
