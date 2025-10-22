@@ -209,11 +209,12 @@ export default function Extensions() {
         extension_no: nextExtension,
         display_name: formData.display_name,
         tech: 'pjsip',
-        caller_id_number: extensionCode,
-        extension_pass: password,
+        callerid: null,
+        password: password,
         status: formData.status,
         assign_to: profile?.id,
-        created_at: new Date().toISOString()
+        date_time: new Date().toISOString(),
+        billing_date_time: new Date().toISOString()
       };
       const { error } = await supabase
         .from('pbx_extensions')
@@ -317,7 +318,7 @@ export default function Extensions() {
       
       // Only update password if provided
       if (editFormData.extension_pass.trim()) {
-        updateData.extension_pass = editFormData.extension_pass;
+        updateData.password = editFormData.extension_pass;
       }
       
       const { error } = await supabase

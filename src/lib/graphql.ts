@@ -169,12 +169,17 @@ class GraphQLService {
   }
 
   async testConnection(): Promise<{ success: boolean; message: string }> {
-    return { success: false, message: 'GraphQL disabled in production' };
+    try {
+      await this.getConfig();
+      await this.getToken();
+      return { success: true, message: 'GraphQL connection successful' };
+    } catch (error) {
+      return { success: false, message: error instanceof Error ? error.message : 'Connection failed' };
+    }
   }
 
   async createExtension(data: ExtensionData): Promise<any> {
-    // Disable GraphQL in production to avoid CORS
-    throw new Error('GraphQL disabled in production');
+
     
     const addQuery = `mutation {
       addExtension(input: {
@@ -229,7 +234,6 @@ class GraphQLService {
   }
 
   async updateExtension(data: ExtensionData): Promise<any> {
-    throw new Error('GraphQL disabled in production');
     const updateQuery = `mutation {
       updateExtension(input: {
         extensionId: ${data.extensionId}, 
@@ -265,7 +269,6 @@ class GraphQLService {
   }
 
   async deleteExtension(extensionId: string): Promise<any> {
-    throw new Error('GraphQL disabled in production');
     const deleteQuery = `mutation {
       deleteExtension(input: {
         extensionId: ${extensionId}
