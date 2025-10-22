@@ -78,6 +78,7 @@ class GraphQLService {
       
       const response = await fetch(config.token_url, {
         method: 'POST',
+        mode: 'cors',
         headers: {
           'Content-Type': 'application/x-www-form-urlencoded',
         },
@@ -131,10 +132,10 @@ class GraphQLService {
 
       const response = await fetch(config.gql_url, {
         method: 'POST',
+        mode: 'cors',
         headers: {
           'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json',
-          'Connection': 'keep-alive'
+          'Content-Type': 'application/json'
         },
         body: JSON.stringify({ query }),
         signal: controller.signal
