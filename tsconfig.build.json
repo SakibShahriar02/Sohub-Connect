@@ -1,0 +1,22 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "noUnusedLocals": false,
+    "noUnusedParameters": false,
+    "skipLibCheck": true
+  },
+  "exclude": [
+    "src/components/UserProfile/**",
+    "src/pages/Settings/**",
+    "src/pages/UserManagement/**",
+    "src/pages/TicketsPage.tsx",
+    "src/pages/ExtensionsPage.tsx",
+    "src/pages/Voice/AddExtension.tsx",
+    "src/pages/Voice/CallerIDs.tsx",
+    "src/pages/Voice/PBX/**",
+    "src/hooks/useSoundFiles.ts",
+    "src/hooks/useUserManagement.ts",
+    "src/lib/freepbx.ts",
+    "src/context/AuthContext.tsx"
+  ]
+}

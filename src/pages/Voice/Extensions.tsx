@@ -19,11 +19,7 @@ interface Extension {
   profiles?: { full_name: string };
 }
 
-interface CallerID {
-  id: number;
-  caller_id: string;
-  description: string;
-}
+
 
 export default function Extensions() {
   const { profile } = useAuth();
@@ -266,13 +262,10 @@ export default function Extensions() {
     
     setDeleting(true);
     try {
-      let graphqlSuccess = false;
-      
       // Try to delete from GraphQL first
       try {
         if (deleteModal.extension.extension_code) {
           await graphqlService.deleteExtension(deleteModal.extension.extension_code);
-          graphqlSuccess = true;
         }
       } catch (graphqlError) {
         console.error('GraphQL deletion failed:', graphqlError);
