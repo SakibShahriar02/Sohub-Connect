@@ -1,76 +1,24 @@
-import { useState } from 'react';
 import { useNavigate } from 'react-router';
 import PageMeta from '../../../components/common/PageMeta';
 import { showDeleteConfirmation } from '../../../utils/deleteConfirmation';
-
-interface Extension {
-  id: number;
-  display_name: string;
-  extension_code: string;
-  extension_no: string;
-  extension_pass: string;
-  status: string;
-  assign_to: string;
-  tech: string;
-  callerid: string;
-  date_time: string;
-}
-
-const dummyExtensions: Extension[] = [
-  {
-    id: 1,
-    display_name: "John Doe",
-    extension_code: "EXT001",
-    extension_no: "1001",
-    extension_pass: "pass123",
-    status: "Active",
-    assign_to: "Sales",
-    tech: "SIP",
-    callerid: "John Doe <1001>",
-    date_time: "2024-01-15 09:30:00"
-  },
-  {
-    id: 2,
-    display_name: "Jane Smith",
-    extension_code: "EXT002",
-    extension_no: "1002",
-    extension_pass: "pass456",
-    status: "Active",
-    assign_to: "Support",
-    tech: "SIP",
-    callerid: "Jane Smith <1002>",
-    date_time: "2024-01-14 14:20:00"
-  },
-  {
-    id: 3,
-    display_name: "Mike Wilson",
-    extension_code: "EXT003",
-    extension_no: "1003",
-    extension_pass: "pass789",
-    status: "Inactive",
-    assign_to: "Marketing",
-    tech: "SIP",
-    callerid: "Mike Wilson <1003>",
-    date_time: "2024-01-13 11:45:00"
-  }
-];
+import { useExtensions } from '../../../hooks/useExtensions';
 
 export default function Extensions() {
   const navigate = useNavigate();
-  const [extensions, setExtensions] = useState<Extension[]>(dummyExtensions);
+  const { extensions, loading, deleteExtension } = useExtensions();
 
   const handleAdd = () => {
     navigate('/voice/pbx/extensions/add');
   };
 
-  const handleEdit = (extension: Extension) => {
+  const handleEdit = (extension: any) => {
     navigate(`/voice/pbx/extensions/edit/${extension.id}`);
   };
 
-  const handleDelete = (extension: Extension) => {
+  const handleDelete = (extension: any) => {
     showDeleteConfirmation({
       text: `Delete ${extension.display_name}?`,
-      onConfirm: () => setExtensions(extensions.filter(ext => ext.id !== extension.id)),
+      onConfirm: () => deleteExtension(extension.id),
       successText: 'Extension has been deleted successfully.'
     });
   };
@@ -102,6 +50,16 @@ export default function Extensions() {
 
         {/* Table */}
         <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 overflow-hidden">
+          {loading ? (
+            <div className="p-8 text-center">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
+              <p className="mt-2 text-gray-600 dark:text-gray-400">Loading extensions...</p>
+            </div>
+          ) : extensions.length === 0 ? (
+            <div className="p-8 text-center">
+              <p className="text-gray-600 dark:text-gray-400">No extensions found. Create your first extension!</p>
+            </div>
+          ) : (
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead className="bg-gray-50 dark:bg-gray-800">
@@ -158,6 +116,7 @@ export default function Extensions() {
               </tbody>
             </table>
           </div>
+          )}
         </div>
       </div>
     </>

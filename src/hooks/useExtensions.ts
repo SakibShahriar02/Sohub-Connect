@@ -86,7 +86,26 @@ export const useExtensions = () => {
 
   useEffect(() => {
     fetchExtensions()
+    
+    // Real-time subscription
+    const subscription = supabase
+      .channel('extensions')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'extensions' }, () => {
+        fetchExtensions()
+      })
+      .subscribe()
+
+    return () => {
+      subscription.unsubscribe()
+    }
   }, [])
+
+  const getNextExtensionNumber = () => {
+    if (extensions.length === 0) return '101'
+    const numbers = extensions.map(ext => parseInt(ext.extension_no)).filter(num => !isNaN(num))
+    const maxNumber = Math.max(...numbers, 100)
+    return (maxNumber + 1).toString()
+  }
 
   return {
     extensions,
@@ -94,6 +113,7 @@ export const useExtensions = () => {
     addExtension,
     updateExtension,
     deleteExtension,
+    getNextExtensionNumber,
     refetch: fetchExtensions
   }
 }
