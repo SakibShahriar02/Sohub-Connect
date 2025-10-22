@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Link } from 'react-router';
+
 import PageMeta from '../../components/common/PageMeta';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../hooks/useAuth';
@@ -15,6 +15,7 @@ interface Extension {
   caller_id_number: string;
   created_at: string;
   password?: string;
+  extension_pass?: string;
   profiles?: { full_name: string };
 }
 
@@ -25,9 +26,9 @@ interface CallerID {
 }
 
 export default function Extensions() {
-  const { user, profile } = useAuth();
+  const { profile } = useAuth();
   const [extensions, setExtensions] = useState<Extension[]>([]);
-  const [callerIds, setCallerIds] = useState<CallerID[]>([]);
+
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [showModal, setShowModal] = useState(false);
@@ -251,7 +252,7 @@ export default function Extensions() {
     setEditModal({show: true, extension});
     setEditFormData({
       display_name: extension.display_name,
-      extension_pass: extension.password || '',
+      extension_pass: extension.extension_pass || extension.password || '',
       status: extension.status
     });
   };

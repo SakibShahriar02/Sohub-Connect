@@ -107,13 +107,13 @@ class GraphQLService {
       this.accessToken = data.access_token;
       return this.accessToken;
     } catch (error) {
-      if (error.name === 'AbortError') {
-        console.error('Token request timed out');
-        throw new Error('FreePBX server is not responding (timeout)');
-      }
-      if (error.name === 'TypeError' && error.message.includes('Failed to fetch')) {
-        console.error('Network error - likely CORS issue:', error);
-        throw new Error('CORS error: Cannot connect to FreePBX server from browser');
+      if (error instanceof Error) {
+        if (error.name === 'AbortError') {
+          throw new Error('FreePBX server is not responding (timeout)');
+        }
+        if (error.name === 'TypeError' && error.message.includes('Failed to fetch')) {
+          throw new Error('CORS error: Cannot connect to FreePBX server from browser');
+        }
       }
       console.error('Token request failed:', error);
       throw error;
@@ -160,8 +160,7 @@ class GraphQLService {
       
       return result;
     } catch (error) {
-      if (error.name === 'AbortError') {
-        console.error('GraphQL request timed out');
+      if (error instanceof Error && error.name === 'AbortError') {
         throw new Error('FreePBX server is not responding (timeout)');
       }
       console.error('GraphQL query failed:', error);
@@ -175,7 +174,7 @@ class GraphQLService {
       await this.getToken();
       return { success: true, message: 'GraphQL connection successful' };
     } catch (error) {
-      return { success: false, message: error.message || 'Connection failed' };
+      return { success: false, message: error instanceof Error ? error.message : 'Connection failed' };
     }
   }
 

@@ -1,6 +1,7 @@
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 import svgr from "vite-plugin-svgr";
+// @ts-ignore
 import uploadPlugin from "./vite-upload-plugin.js";
 
 // https://vite.dev/config/
