@@ -3,7 +3,7 @@ import { Link } from 'react-router';
 import PageMeta from '../../components/common/PageMeta';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../hooks/useAuth';
-import { deleteExtensionInFreePBX, createExtensionInFreePBX, clearFreePBXConfigCache } from '../../lib/freepbx';
+import { graphqlService } from '../../lib/graphql';
 
 interface Extension {
   id: number;
@@ -65,8 +65,11 @@ export default function Extensions() {
 
 
   const fetchExtensions = async (isRefresh = false) => {
-    if (isRefresh) setRefreshing(true);
-    if (!isRefresh) setLoading(true);
+    if (isRefresh) {
+      setRefreshing(true);
+    } else {
+      setLoading(true);
+    }
     
     try {
       let query = supabase
@@ -89,25 +92,13 @@ export default function Extensions() {
       setExtensions(extensionsList);
       setTotalExtensions(extensionsList.length);
       
-      // Always filter after setting extensions
-      let filtered = extensionsList;
-      if (searchTerm) {
-        filtered = extensionsList.filter(ext => 
-          ext.display_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          ext.extension_no.includes(searchTerm) ||
-          ext.extension_code.toLowerCase().includes(searchTerm.toLowerCase())
-        );
-      }
-      setFilteredExtensions(filtered);
-      
     } catch (error) {
       showToast('Failed to load extensions', 'error');
       setExtensions([]);
-      setFilteredExtensions([]);
       setTotalExtensions(0);
     } finally {
       setLoading(false);
-      if (isRefresh) setRefreshing(false);
+      setRefreshing(false);
     }
   };
 
@@ -164,26 +155,7 @@ export default function Extensions() {
 
 
 
-  const fetchNextExtension = async () => {
-    try {
-      const { data, error } = await supabase
-        .from('pbx_extensions')
-        .select('extension_no')
-        .order('id', { ascending: false })
-        .limit(1);
 
-      if (error) throw error;
-      
-      if (data && data.length > 0) {
-        const lastExt = parseInt(data[0].extension_no);
-        setNextExtension((lastExt + 1).toString());
-      } else {
-        setNextExtension('101');
-      }
-    } catch (error) {
-      // Silent error handling
-    }
-  };
 
   const generateExtensionCode = (extensionNo: string) => {
     return `${profile?.merchant_number || ''}${extensionNo}`;
@@ -191,7 +163,16 @@ export default function Extensions() {
 
   const handleAddExtension = () => {
     setShowModal(true);
-    fetchNextExtension();
+    
+    // Calculate next extension number from current data
+    let nextNumber = '101';
+    if (extensions.length > 0) {
+      const numbers = extensions.map(ext => parseInt(ext.extension_no)).filter(num => !isNaN(num));
+      const maxNumber = Math.max(...numbers, 100);
+      nextNumber = (maxNumber + 1).toString();
+    }
+    setNextExtension(nextNumber);
+    
     setFormData({
       display_name: '',
       extension_pass: generatePassword(),
@@ -207,20 +188,20 @@ export default function Extensions() {
       const extensionCode = generateExtensionCode(nextExtension);
       const password = formData.extension_pass || generatePassword();
       
-      let freepbxSuccess = false;
+      let graphqlSuccess = false;
       
-      // Try to create extension in FreePBX first
+      // Try to create extension in GraphQL first
       try {
-        clearFreePBXConfigCache();
-        await createExtensionInFreePBX({
-          extension: extensionCode,
+        await graphqlService.createExtension({
+          extensionId: extensionCode,
           name: formData.display_name,
           tech: 'pjsip',
+          callerID: extensionCode,
           secret: password
         });
-        freepbxSuccess = true;
-      } catch (freepbxError) {
-        // Silent fail for FreePBX
+        graphqlSuccess = true;
+      } catch (graphqlError) {
+        console.error('GraphQL creation failed:', graphqlError);
       }
       
       // Save to database
@@ -243,7 +224,7 @@ export default function Extensions() {
       
       setShowModal(false);
       await fetchExtensions();
-      showToast('Extension created successfully!', 'success');
+      showToast(graphqlSuccess ? 'Extension created successfully!' : 'Extension created in database only', 'success');
     } catch (error: any) {
       showToast('Failed to create extension', 'error');
     }
@@ -257,21 +238,8 @@ export default function Extensions() {
     }
   }, [profile?.id]);
 
-  // Also fetch when component mounts and profile is already available
   useEffect(() => {
-    const timer = setTimeout(() => {
-      if (profile?.id && extensions.length === 0 && !loading) {
-        fetchExtensions();
-      }
-    }, 100);
-    
-    return () => clearTimeout(timer);
-  }, []);
-
-  useEffect(() => {
-    if (extensions.length > 0) {
-      filterExtensions(extensions, searchTerm);
-    }
+    filterExtensions(extensions, searchTerm);
   }, [extensions, searchTerm]);
 
 
@@ -294,16 +262,16 @@ export default function Extensions() {
     
     setDeleting(true);
     try {
-      let freepbxSuccess = false;
+      let graphqlSuccess = false;
       
-      // Try to delete from FreePBX first
+      // Try to delete from GraphQL first
       try {
         if (deleteModal.extension.extension_code) {
-          await deleteExtensionInFreePBX(deleteModal.extension.extension_code);
-          freepbxSuccess = true;
+          await graphqlService.deleteExtension(deleteModal.extension.extension_code);
+          graphqlSuccess = true;
         }
-      } catch (freepbxError) {
-        // Silent fail for FreePBX
+      } catch (graphqlError) {
+        console.error('GraphQL deletion failed:', graphqlError);
       }
       
       // Delete from database
@@ -329,6 +297,23 @@ export default function Extensions() {
     
     setUpdating(true);
     try {
+      // Try to update in GraphQL first
+      let graphqlSuccess = false;
+      try {
+        if (editFormData.extension_pass.trim()) {
+          await graphqlService.updateExtension({
+            extensionId: editModal.extension.extension_code,
+            name: editFormData.display_name,
+            tech: editModal.extension.tech,
+            callerID: editModal.extension.extension_code,
+            secret: editFormData.extension_pass
+          });
+          graphqlSuccess = true;
+        }
+      } catch (graphqlError) {
+        console.error('GraphQL update failed:', graphqlError);
+      }
+      
       const updateData: any = {
         display_name: editFormData.display_name,
         status: editFormData.status
@@ -348,7 +333,7 @@ export default function Extensions() {
       
       setEditModal({show: false, extension: null});
       await fetchExtensions();
-      showToast('Extension updated successfully!', 'success');
+      showToast(graphqlSuccess ? 'Extension updated successfully!' : 'Extension updated in database only', 'success');
     } catch (error: any) {
       showToast('Failed to update extension', 'error');
     }
@@ -401,6 +386,15 @@ export default function Extensions() {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
               </svg>
               Export
+            </button>
+            <button
+              onClick={async () => {
+                const result = await graphqlService.testConnection();
+                showToast(result.message, result.success ? 'success' : 'error');
+              }}
+              className="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg transition-colors"
+            >
+              Test GraphQL
             </button>
             <button
               onClick={handleAddExtension}
