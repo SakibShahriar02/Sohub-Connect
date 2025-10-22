@@ -15,6 +15,7 @@ export interface User {
   nid_front?: string;
   nid_back?: string;
   certificate?: string;
+  merchant_number?: number;
   role: string;
   role_id: number;
   status: 'Active' | 'Inactive' | 'Suspended';
@@ -33,7 +34,7 @@ export const useUserManagement = () => {
         .from('profiles')
         .select(`
           id, user_id, name, full_name, email, phone, mobileno, address, 
-          profile_picture, nid_front, nid_back, certificate,
+          profile_picture, nid_front, nid_back, certificate, merchant_number,
           role_id, status, created_at, updated_at,
           roles (name)
         `);
@@ -65,9 +66,32 @@ export const useUserManagement = () => {
     return `USR${timestamp}${random}`;
   };
 
+  const generateMerchantNumber = async () => {
+    const { data } = await supabase
+      .from('profiles')
+      .select('merchant_number')
+      .not('merchant_number', 'is', null)
+      .order('merchant_number', { ascending: false })
+      .limit(1)
+      .single();
+    
+    return data?.merchant_number ? data.merchant_number + 1 : 1000;
+  };
+
   const createUser = async (userData: Omit<User, 'id' | 'user_id' | 'created_at' | 'updated_at'>, password: string) => {
     try {
-      // Create user in auth.users
+      // Check if user already exists in profiles
+      const { data: existingProfile } = await supabase
+        .from('profiles')
+        .select('email')
+        .eq('email', userData.email)
+        .single();
+      
+      if (existingProfile) {
+        throw new Error('A user with this email already exists');
+      }
+
+      // Create user in auth.users first
       const { data: authData, error: authError } = await supabaseAdmin.auth.admin.createUser({
         email: userData.email,
         password: password,
@@ -77,8 +101,9 @@ export const useUserManagement = () => {
       if (authError) throw authError;
 
       const userId = generateUserId();
+      const merchantNumber = await generateMerchantNumber();
 
-      // Create profile
+      // Use upsert to handle potential duplicate IDs
       const { data, error } = await supabase
         .from('profiles')
         .upsert([{
@@ -94,21 +119,23 @@ export const useUserManagement = () => {
           nid_front: userData.nid_front,
           nid_back: userData.nid_back,
           certificate: userData.certificate,
+          merchant_number: merchantNumber,
           role_id: userData.role_id,
           status: userData.status
-        }])
+        }], { onConflict: 'id' })
         .select()
         .single();
 
-      if (error) throw error;
+      if (error) {
+        // Rollback auth user if profile creation fails
+        await supabaseAdmin.auth.admin.deleteUser(authData.user.id);
+        throw error;
+      }
       
       setUsers(prev => [data, ...prev]);
       return data;
     } catch (error: any) {
       console.error('Error creating user:', error);
-      if (error.message?.includes('already been registered')) {
-        throw new Error('A user with this email already exists');
-      }
       throw error;
     }
   };

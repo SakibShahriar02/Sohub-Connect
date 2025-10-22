@@ -13,9 +13,9 @@ export default function UserList() {
   const { roles: allRoles } = useRoles();
   const roleNames = allRoles.map(r => r.name);
   
-  const filteredUsers = roleFilter 
+  const filteredUsers = (roleFilter 
     ? users.filter(user => user.role === roleFilter)
-    : users;
+    : users).sort((b, a) => (a.merchant_number || 0) - (b.merchant_number || 0));
 
   const handleDelete = (user: any) => {
     showDeleteConfirmation({
@@ -86,7 +86,7 @@ export default function UserList() {
             <table className="w-full">
               <thead className="bg-gray-50 dark:bg-gray-800/50">
                 <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">User ID</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Merchant No</th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Name</th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Email</th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Mobile</th>
@@ -98,8 +98,8 @@ export default function UserList() {
               <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
                 {filteredUsers.map((user) => (
                   <tr key={user.id} className="hover:bg-gray-50 dark:hover:bg-gray-800/30">
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white">
-                      {user.user_id}
+                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-blue-600 dark:text-blue-400">
+                      {user.merchant_number}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
                       {user.name || user.full_name}

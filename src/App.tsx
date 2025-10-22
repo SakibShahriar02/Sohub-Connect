@@ -29,9 +29,9 @@ import TicketDetail from "./pages/Tickets/TicketDetail";
 import ClickToConnect from "./pages/ClickToConnect";
 import HotScan from "./pages/HotScan";
 import OperatorPanel from "./pages/Voice/PBX/OperatorPanel";
-import Extensions from "./pages/Voice/PBX/Extensions";
-import AddExtension from "./pages/Voice/PBX/AddExtension";
-import EditExtension from "./pages/Voice/PBX/EditExtension";
+import Extensions from "./pages/Voice/Extensions";
+import AddExtension from "./pages/Voice/AddExtension";
+import EditExtension from "./pages/Voice/EditExtension";
 import InboundRoute from "./pages/Voice/PBX/InboundRoute";
 import AddInboundRoute from "./pages/Voice/PBX/AddInboundRoute";
 import EditInboundRoute from "./pages/Voice/PBX/EditInboundRoute";
@@ -104,6 +104,9 @@ export default function App() {
 
             {/* Voice - PBX */}
             <Route path="voice/pbx/operator-panel" element={<OperatorPanel />} />
+            <Route path="voice/extensions" element={<Extensions />} />
+            <Route path="voice/extensions/add" element={<AddExtension />} />
+            <Route path="voice/extensions/edit/:id" element={<EditExtension />} />
             <Route path="voice/pbx/extensions" element={<Extensions />} />
             <Route path="voice/pbx/extensions/add" element={<AddExtension />} />
             <Route path="voice/pbx/extensions/edit/:id" element={<EditExtension />} />

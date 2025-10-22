@@ -13,6 +13,7 @@ interface Profile {
   nid_front: string | null
   nid_back: string | null
   certificate: string | null
+  merchant_number: number | null
 }
 
 export const useAuth = () => {
@@ -52,7 +53,7 @@ export const useAuth = () => {
         .from('profiles')
         .select(`
           id, email, full_name, role, phone, status, 
-          profile_picture, nid_front, nid_back, certificate,
+          profile_picture, nid_front, nid_back, certificate, merchant_number,
           roles (name)
         `)
         .eq('id', userId)
