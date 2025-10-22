@@ -30,7 +30,7 @@ class GraphQLService {
         .single();
 
       if (error) {
-
+        console.error('Database error:', error);
         throw error;
       }
 
@@ -40,7 +40,7 @@ class GraphQLService {
 
       // Check if all required fields are present
       if (!data.freepbx_token_url || !data.freepbx_graphql_url || !data.freepbx_client_id || !data.freepbx_client_secret) {
-
+        console.error('Missing GraphQL configuration fields:', data);
         throw new Error('Incomplete GraphQL configuration');
       }
 
@@ -57,7 +57,7 @@ class GraphQLService {
 
       return this.config;
     } catch (error) {
-
+      console.error('Failed to get GraphQL config:', error);
       throw error;
     }
   }
@@ -93,7 +93,7 @@ class GraphQLService {
       
       if (!response.ok) {
         const errorText = await response.text();
-
+        console.error('Token request failed:', response.status, errorText);
         throw new Error(`Failed to get access token: ${response.status} ${errorText}`);
       }
 
@@ -115,7 +115,7 @@ class GraphQLService {
           throw new Error('CORS error: Cannot connect to FreePBX server from browser');
         }
       }
-
+      console.error('Token request failed:', error);
       throw error;
     }
   }
@@ -146,7 +146,7 @@ class GraphQLService {
 
       if (!response.ok) {
         const errorText = await response.text();
-
+        console.error('GraphQL request failed:', response.status, errorText);
         throw new Error(`GraphQL request failed: ${response.status} ${errorText}`);
       }
 
@@ -154,7 +154,7 @@ class GraphQLService {
 
       
       if (result.errors) {
-
+        console.error('GraphQL errors:', result.errors);
         throw new Error(`GraphQL errors: ${JSON.stringify(result.errors)}`);
       }
       
@@ -163,7 +163,7 @@ class GraphQLService {
       if (error instanceof Error && error.name === 'AbortError') {
         throw new Error('FreePBX server is not responding (timeout)');
       }
-
+      console.error('GraphQL query failed:', error);
       throw error;
     }
   }
@@ -228,7 +228,7 @@ class GraphQLService {
       
       return { success: true };
     } catch (error) {
-
+      console.error('Create extension failed:', error);
       throw error;
     }
   }
@@ -263,7 +263,7 @@ class GraphQLService {
       await this.executeQuery(applyQuery);
       return { success: true };
     } catch (error) {
-
+      console.error('Update extension failed:', error);
       throw error;
     }
   }
@@ -291,7 +291,7 @@ class GraphQLService {
       await this.executeQuery(applyQuery);
       return { success: true };
     } catch (error) {
-
+      console.error('Delete extension failed:', error);
       throw error;
     }
   }
