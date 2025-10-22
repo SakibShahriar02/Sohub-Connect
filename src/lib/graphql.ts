@@ -169,18 +169,22 @@ class GraphQLService {
   }
 
   async testConnection(): Promise<{ success: boolean; message: string }> {
-    try {
-      await this.getConfig();
-      await this.getToken();
-      return { success: true, message: 'GraphQL connection successful' };
-    } catch (error) {
-      return { success: false, message: error instanceof Error ? error.message : 'Connection failed' };
-    }
+    return { success: false, message: 'GraphQL disabled in production' };
   }
 
   async createExtension(data: ExtensionData): Promise<any> {
+    throw new Error('GraphQL disabled in production');
+  }
 
-    
+  async updateExtension(data: ExtensionData): Promise<any> {
+    throw new Error('GraphQL disabled in production');
+  }
+
+  async deleteExtension(extensionId: string): Promise<any> {
+    throw new Error('GraphQL disabled in production');
+  }
+
+  async _createExtension_disabled(data: ExtensionData): Promise<any> {
     const addQuery = `mutation {
       addExtension(input: {
         extensionId: ${data.extensionId}, 
@@ -233,68 +237,7 @@ class GraphQLService {
     }
   }
 
-  async updateExtension(data: ExtensionData): Promise<any> {
-    const updateQuery = `mutation {
-      updateExtension(input: {
-        extensionId: ${data.extensionId}, 
-        name: "${data.name}",
-        tech: "${data.tech}",
-        email: "",
-        channelName: "", 
-        outboundCid: "${data.callerID}",
-        callerID: "${data.callerID}",
-        extPassword: "${data.secret}",
-      }) {
-        status
-        message
-      }
-    }`;
 
-    const applyQuery = `mutation { 
-      doreload(input: {}) { 
-        message 
-        status 
-        transaction_id 
-      } 
-    }`;
-
-    try {
-      await this.executeQuery(updateQuery);
-      await this.executeQuery(applyQuery);
-      return { success: true };
-    } catch (error) {
-      console.error('Update extension failed:', error);
-      throw error;
-    }
-  }
-
-  async deleteExtension(extensionId: string): Promise<any> {
-    const deleteQuery = `mutation {
-      deleteExtension(input: {
-        extensionId: ${extensionId}
-      }) {
-        status
-        message
-      }
-    }`;
-
-    const applyQuery = `mutation { 
-      doreload(input: {}) { 
-        message 
-        status 
-        transaction_id 
-      } 
-    }`;
-
-    try {
-      await this.executeQuery(deleteQuery);
-      await this.executeQuery(applyQuery);
-      return { success: true };
-    } catch (error) {
-      console.error('Delete extension failed:', error);
-      throw error;
-    }
-  }
 }
 
 export const graphqlService = new GraphQLService();
