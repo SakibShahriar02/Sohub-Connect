@@ -44,9 +44,11 @@ class GraphQLService {
         throw new Error('Incomplete GraphQL configuration');
       }
 
+      // Use proxy URLs in development to avoid CORS
+      const isDev = import.meta.env.DEV;
       this.config = {
-        token_url: data.freepbx_token_url,
-        gql_url: data.freepbx_graphql_url,
+        token_url: isDev ? '/freepbx-api/admin/api/api/token' : data.freepbx_token_url,
+        gql_url: isDev ? '/freepbx-api/admin/api/api/gql' : data.freepbx_graphql_url,
         client_id: data.freepbx_client_id,
         client_secret: data.freepbx_client_secret
       };
@@ -113,6 +115,10 @@ class GraphQLService {
       if (error.name === 'AbortError') {
         console.error('Token request timed out');
         throw new Error('FreePBX server is not responding (timeout)');
+      }
+      if (error.name === 'TypeError' && error.message.includes('Failed to fetch')) {
+        console.error('Network error - likely CORS issue:', error);
+        throw new Error('CORS error: Cannot connect to FreePBX server from browser');
       }
       console.error('Token request failed:', error);
       throw error;

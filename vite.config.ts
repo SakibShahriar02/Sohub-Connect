@@ -17,4 +17,14 @@ export default defineConfig({
     }),
     uploadPlugin(),
   ],
+  server: {
+    proxy: {
+      '/freepbx-api': {
+        target: 'https://voice.tolpar.com.bd',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/freepbx-api/, ''),
+        secure: true
+      }
+    }
+  }
 });
