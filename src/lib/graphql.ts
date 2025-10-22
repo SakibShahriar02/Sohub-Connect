@@ -169,11 +169,6 @@ class GraphQLService {
   }
 
   async testConnection(): Promise<{ success: boolean; message: string }> {
-    // Skip GraphQL in production if no proxy is configured
-    if (import.meta.env.PROD) {
-      return { success: false, message: 'GraphQL disabled in production' };
-    }
-    
     try {
       await this.getConfig();
       await this.getToken();
@@ -184,10 +179,6 @@ class GraphQLService {
   }
 
   async createExtension(data: ExtensionData): Promise<any> {
-    // Skip GraphQL in production if no proxy is configured
-    if (import.meta.env.PROD) {
-      throw new Error('GraphQL disabled in production');
-    }
 
     
     const addQuery = `mutation {
@@ -243,9 +234,6 @@ class GraphQLService {
   }
 
   async updateExtension(data: ExtensionData): Promise<any> {
-    if (import.meta.env.PROD) {
-      throw new Error('GraphQL disabled in production');
-    }
     const updateQuery = `mutation {
       updateExtension(input: {
         extensionId: ${data.extensionId}, 
@@ -281,9 +269,6 @@ class GraphQLService {
   }
 
   async deleteExtension(extensionId: string): Promise<any> {
-    if (import.meta.env.PROD) {
-      throw new Error('GraphQL disabled in production');
-    }
     const deleteQuery = `mutation {
       deleteExtension(input: {
         extensionId: ${extensionId}
