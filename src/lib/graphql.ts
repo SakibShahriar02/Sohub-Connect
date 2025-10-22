@@ -53,12 +53,7 @@ class GraphQLService {
         client_secret: data.freepbx_client_secret
       };
 
-      console.log('GraphQL config loaded:', { 
-        token_url: this.config.token_url, 
-        gql_url: this.config.gql_url,
-        client_id: this.config.client_id ? 'SET' : 'MISSING',
-        client_secret: this.config.client_secret ? 'SET' : 'MISSING'
-      });
+
 
       return this.config;
     } catch (error) {
@@ -73,7 +68,7 @@ class GraphQLService {
     try {
       const config = await this.getConfig();
       
-      console.log('Requesting token from:', config.token_url);
+
       
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
@@ -94,7 +89,7 @@ class GraphQLService {
       });
 
       clearTimeout(timeoutId);
-      console.log('Token response status:', response.status);
+
       
       if (!response.ok) {
         const errorText = await response.text();
@@ -103,7 +98,7 @@ class GraphQLService {
       }
 
       const data = await response.json();
-      console.log('Token received:', data.access_token ? 'SUCCESS' : 'FAILED');
+
       
       if (!data.access_token) {
         throw new Error('No access token in response');
@@ -130,8 +125,7 @@ class GraphQLService {
       const config = await this.getConfig();
       const token = await this.getToken();
 
-      console.log('Executing GraphQL query to:', config.gql_url);
-      console.log('Query:', query);
+
 
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
@@ -148,7 +142,7 @@ class GraphQLService {
       });
 
       clearTimeout(timeoutId);
-      console.log('GraphQL response status:', response.status);
+
 
       if (!response.ok) {
         const errorText = await response.text();
@@ -157,7 +151,7 @@ class GraphQLService {
       }
 
       const result = await response.json();
-      console.log('GraphQL response:', result);
+
       
       if (result.errors) {
         console.error('GraphQL errors:', result.errors);
@@ -186,7 +180,7 @@ class GraphQLService {
   }
 
   async createExtension(data: ExtensionData): Promise<any> {
-    console.log('Creating extension with data:', data);
+
     
     const addQuery = `mutation {
       addExtension(input: {
@@ -229,17 +223,9 @@ class GraphQLService {
     }`;
 
     try {
-      console.log('Step 1: Adding extension...');
-      const addResult = await this.executeQuery(addQuery);
-      console.log('Add result:', addResult);
-      
-      console.log('Step 2: Updating extension...');
-      const updateResult = await this.executeQuery(updateQuery);
-      console.log('Update result:', updateResult);
-      
-      console.log('Step 3: Applying changes...');
-      const applyResult = await this.executeQuery(applyQuery);
-      console.log('Apply result:', applyResult);
+      await this.executeQuery(addQuery);
+      await this.executeQuery(updateQuery);
+      await this.executeQuery(applyQuery);
       
       return { success: true };
     } catch (error) {

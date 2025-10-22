@@ -14,6 +14,8 @@ interface Extension {
   status: string;
   caller_id_number: string;
   created_at: string;
+  password?: string;
+  profiles?: { full_name: string };
 }
 
 interface CallerID {
@@ -205,20 +207,21 @@ export default function Extensions() {
       }
       
       // Save to database
+      const insertData = {
+        extension_code: extensionCode,
+        extension_no: nextExtension,
+        display_name: formData.display_name,
+        tech: 'pjsip',
+        callerid: null,
+        password: password,
+        status: formData.status,
+        assign_to: profile?.id,
+        date_time: new Date().toISOString(),
+        billing_date_time: new Date().toISOString()
+      };
       const { error } = await supabase
         .from('pbx_extensions')
-        .insert({
-          extension_code: extensionCode,
-          extension_no: nextExtension,
-          display_name: formData.display_name,
-          tech: 'pjsip',
-          callerid: null,
-          password: password,
-          status: formData.status,
-          assign_to: profile?.id,
-          date_time: new Date().toISOString(),
-          billing_date_time: new Date().toISOString()
-        });
+        .insert(insertData);
 
       if (error) throw error;
       
