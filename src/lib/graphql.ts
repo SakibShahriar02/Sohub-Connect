@@ -173,15 +173,63 @@ class GraphQLService {
   }
 
   async createExtension(data: ExtensionData): Promise<any> {
-    throw new Error('GraphQL disabled in production');
+    try {
+      const response = await fetch('/api/graphql.php', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          action: 'create_extension',
+          data: data
+        })
+      });
+      
+      const result = await response.json();
+      return result;
+    } catch (error) {
+      throw error;
+    }
   }
 
   async updateExtension(data: ExtensionData): Promise<any> {
-    throw new Error('GraphQL disabled in production');
+    try {
+      const response = await fetch('/api/graphql.php', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          action: 'update_extension',
+          data: data
+        })
+      });
+      
+      const result = await response.json();
+      return result;
+    } catch (error) {
+      throw error;
+    }
   }
 
   async deleteExtension(extensionId: string): Promise<any> {
-    throw new Error('GraphQL disabled in production');
+    try {
+      const response = await fetch('/api/graphql.php', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          action: 'delete_extension',
+          data: { extensionId }
+        })
+      });
+      
+      const result = await response.json();
+      return result;
+    } catch (error) {
+      throw error;
+    }
   }
 
   async _createExtension_disabled(data: ExtensionData): Promise<any> {
